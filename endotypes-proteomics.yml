@@ -38,9 +38,6 @@ dependencies:
   - bioconductor-complexheatmap
   - r-circlize
 
-  # clinical-variable selection
-  - r-varsellcm
-
   # support layer
   - r-fpc                                 # clusterboot, bootstrap Jaccard
   - bioconductor-impute                   # modulePreservation dependency
