@@ -1,55 +1,23 @@
-# Python
-__pycache__/
-*.py[cod]
-*.egg-info/
-build/
-dist/
-.pytest_cache/
-.venv/
-venv/
+# study data -- never committed
+data/
 
-# Vendored upstream R source: fetched on demand by scripts/fetch_reference.sh,
-# never committed -- it is someone else's GPL code and a committed copy goes stale.
-reference/
+# ipynb/ holds the notebooks, which ARE tracked. Everything in it derived from
+# the study data is not. cohort_assignment.csv is the deliberate exception:
+# it freezes cohort membership and carries no abundance values.
+ipynb/artifacts/
+ipynb/*.csv
+!ipynb/cohort_assignment.csv
+ipynb/*.rds
+ipynb/*.png
+ipynb/*.svg
+ipynb/*.pdf
+ipynb/*.html
+ipynb/.ipynb_checkpoints/
 
-# Nextflow (the sibling workflow repos)
-work/
-.nextflow*
-results/
-timeline-*.html
-trace-*.txt
-dag-*.html
+# R
+.Rhistory
+.RData
+.Rproj.user/
 
 # macOS
 .DS_Store
-
-# Study data: fetched, never committed. See README for sources.
-#
-# ANCHORED with a leading slash on purpose. An unanchored `data/` matches a directory
-# of that name at ANY depth, which silently excluded src/pvclust_py/data/ -- the demo
-# dataset the package ships -- so CI cloned a repo without it and 35 tests failed on
-# FileNotFoundError. This rule is for the study data at the repo root only.
-/data/
-
-# Analysis outputs. Every command writes to the working directory, so running one
-# from the repo root leaves artifacts here; they are results, not source.
-*_edges.csv
-*_counts.csv
-*_diagnostics.csv
-*_features.csv
-*_labels.txt
-*_stats.npz
-*_dendrogram.*
-*_heatmap_*.*
-*_from-federated_*.csv
-federated_*.csv
-federated_*.json
-*.json
-!ipynb/*.ipynb
-
-# Derived cohort splits, written by the walkthrough
-*_abundance.csv
-*_metadata.csv
-
-# Notebook 3/4 working directory
-/sle-run/

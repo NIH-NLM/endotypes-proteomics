@@ -1,0 +1,47 @@
+# Environment for endotypes-proteomics.
+#
+#   micromamba env create -f endotypes-proteomics.yml    (or conda/mamba)
+#   micromamba activate endotypes-proteomics
+#   Rscript -e 'IRkernel::installspec()'                 # register the R kernel
+#   python -m bash_kernel.install                        # register the Bash kernel
+#   jupyter lab
+#
+# All analysis is R. JupyterLab, nbconvert and bash_kernel are Python packages,
+# so conda pulls a Python interpreter in as their dependency -- it is the notebook
+# host, not a language this project writes code in.
+name: endotypes-proteomics
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  # ── notebook host and kernels ───────────────────────────────────────────
+  - jupyterlab
+  - nbconvert                  # run_all.sh, the machine path
+  - r-irkernel                 # R kernel
+  - bash_kernel                # Bash kernel
+
+  # ── R ───────────────────────────────────────────────────────────────────
+  - r-base=4.4.*
+
+  # 00  batch correction
+  - bioconductor-sva                      # ComBat
+
+  # 01-03  soft threshold, modules, eigenproteins
+  - r-wgcna
+  - r-dynamictreecut                      # WGCNA dependency, pinned so it is visible
+  - r-fastcluster
+
+  # 05  patient clustering
+  - r-cluster                             # silhouette
+
+  # 06, 08  figures
+  - bioconductor-complexheatmap
+  - r-circlize
+
+  # clinical-variable selection
+  - r-varsellcm
+
+  # support layer
+  - r-fpc                                 # clusterboot, bootstrap Jaccard
+  - bioconductor-impute                   # modulePreservation dependency
+  - bioconductor-preprocesscore           # modulePreservation dependency
