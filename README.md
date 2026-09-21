@@ -3,34 +3,59 @@
 **Unsupervised protein modules, then patient endotypes, in plasma proteomics — one step per
 notebook, one step per container.**
 
-> The directory on disk is still `kmeans-py`, from an earlier phase when this was a k-means
-> experiment in Python. Neither half is accurate any more. See [Naming](#naming).
+Given a protein abundance matrix and patient metadata, we are looking for  **endotypes** —
+patients sharing a similar pattern of protein expression. 
 
-## What this does
+## Conceptual approach
+Proteins are co-expressed additionally with a measurement technology such as the SomaScan array
+There are multiple probes to the same protein.  
 
-Given a protein abundance matrix and patient metadata, it asks whether there are **endotypes** —
-sets of patients sharing a coordinated shift across a set of proteins. That is a *block*, a
-patient × protein rectangle, not two dendrograms glued to the sides of a heatmap.
-
-The order is the argument:
-
-1. **Define protein modules first, unsupervised**, told nothing about the patients.
-2. **Then** summarise each module as one number per patient and look for patient structure.
-
-Selecting proteins by how well they separate known groups collapses them onto one axis — 60 proteins
-selected that way correlated at median 0.73 and one component explained 72% of their variance, so
-there were no modules left to find. Defining modules first avoids that.
-
-## The data
+1. **Define protein modules unsupervised** -- Protein module clustering without patient information.
+2. **Describe protein modulesn** Look for patterns in patient structure within these protein modules.
+   
+## Example
 
 SomaScan v4.1 plasma proteomics in systemic lupus erythematosus, Imperial College London
 (Leung, Pickering, Botto, Peters).
 
-> **https://doi.org/10.5281/zenodo.20342569**
+**https://doi.org/10.5281/zenodo.20342569**
 
-Download the record and unzip it so the files sit at `data/SLE_doi.10.5281_zenodo_20342569/`:
+## Prepare the data
 
+### Running on ADAPTS
+
+1. Login to lifebit.ai
+2. Use your PIV card to authenticate
+3. Spin up JupyterLab Notebook (8 vCPUs, 16GB RAM)
+
+When ready, open a terminal window
+
+4. Clone the repository and change directory 
+
+```bash
+git clone https://github.com/NIH-NLM/endotypes-proteomics.git
+cd endotypes-proteomics
 ```
+
+5. Create a directory under the data directory
+
+```bash
+mkdir data/SLE_doi.10.5281_zenodo_20342569/`
+cd data/SLE_doi.10.5281_zenodo_20342569
+curl https://zenodo.org/api/records/20342569/files-archive > SLE_doi.10.5281_zenodo_2034256.zip
+unzip SLE_doi.10.5281_zenodo_2034256.zip
+rm SLE_doi.10.5281_zenodo_2034256.zip
+cd ../..
+pwd
+```
+
+6. Confirm you have the data.
+```bash
+ls -l data
+```
+The files should now show these three files
+
+```bash
 data/SLE_doi.10.5281_zenodo_20342569/
 ├── abundance.csv          369 samples x 7,288 SOMAmers, RFU
 ├── sample-metadata.csv    Group (283 SLE / 86 HV), Included_in_study, Batch,
@@ -38,11 +63,7 @@ data/SLE_doi.10.5281_zenodo_20342569/
 └── feature_metadata.txt   SeqId -> Target / UniProt / GeneSymbol
 ```
 
-`data/` is gitignored, and so is everything in `ipynb/` derived from it. **No study data is
-committed.** The one exception is `ipynb/cohort_assignment.csv`, which freezes cohort membership and
-carries sample identifiers but no abundance values.
-
-## Install and run
+### Environment Setup
 
 ```bash
 micromamba env create -f endotypes-proteomics.yml
@@ -51,28 +72,10 @@ Rscript -e 'IRkernel::installspec()'    # R kernel
 python -m bash_kernel.install           # Bash kernel
 ```
 
-By hand:
+### Notebooks
 
-```bash
-jupyter lab
-```
-
-By machine:
-
-```bash
-./run_all.sh              # steps 00-07
-./run_all.sh --optional   # also 08 and 09, the projections
-```
-
-All analysis is R. JupyterLab, `nbconvert` and `bash_kernel` are Python packages, so conda pulls a
-Python interpreter in as their dependency — it is the notebook host, not a language this project
-writes code in.
-
-## The steps
-
-Each notebook is one stage, reads the artifact the previous stage wrote, and writes its own. No
-stage refits what an earlier stage fitted, which is what makes them separable, cacheable and
-containerizable one per stage.
+For ease of analysis and understanding, a notebook was created for each of the separate execution steps
+Each notebook reads the artifact of the previous step and then writes out its own output.
 
 | notebook | does |
 |---|---|
@@ -87,27 +90,21 @@ containerizable one per stage.
 | `08_project_healthy` | the 86 healthy volunteers, scored on SLE-defined modules |
 | `09_project_timepoints` | *optional* — later visits of repeat donors |
 
-### Correct once, before anything
+### Initial Data Transformation and Batch Correction
 
-Step 00 does **every** fix to the data in one pass, across all 356 included samples, before any
-biological selection and before any split. Correction is a property of the assay, not of the
-question. In order: log2 → ComBat → gene symbols → age as an ordered band → one sample per donor →
-split.
+Step 00 prepares the data in one pass.
 
-**Healthy volunteers stay in for the correction and are then held out of every fit.** They are
-*projected* in step 08, not pooled — see below.
+There are 6 subjects that have multiple samples.  Only the first sample is used.
+Later visits are explored in step 09
 
-**One sample per donor.** 270 SLE samples come from 260 donors; six were sampled repeatedly and
-`SampleId` encodes the visit. The first visit is kept, and it is also the most active disease
-(D256: SLEDAI-2K 9 → 6 → 4 → 2; D173: 12 → 5), so "first by date" and "highest activity" pick the
-same sample. Later visits go to their own matrix for step 09.
+### Cohorts
 
-**Cohort membership is frozen** to `cohort_assignment.csv` and read back on every run, so no
-downstream number changes because of a reshuffle. Cohorts are 87 / 87 / 86, stratified within batch.
+Three cohorts A,B and C were created by randomly sampling, so we could illustrate batch correction.
 
-## What was found
+### Outcomes
 
-### The published interferon module is recovered
+The original authors also used WGCNA. We were able to recapitulate the findings in the original paper 
+including the interferon module is recovered
 
 `ivory`, 14 proteins, 10 of them canonical interferon-stimulated: STAT1 (×2), DDX58, IFIT3, ISG15
 (×2), GBP1, MX1, IFIH1, CXCL10. Hub by module membership is **ISG15 `seq.14151.4`** at kME 0.94 —
@@ -213,34 +210,3 @@ would produce**, not a federated run.
 
 All work at n in the low hundreds or more. None attempts module discovery at n = 87.
 
-## Naming
-
-**`endotypes-proteomics`** carries no method and no language, deliberately. Two methods are in play —
-WGCNA for the proteins, VarSelLCM for the clinical variables — so a method name would have to pick
-between them. A method name is also a hostage: WGCNA is **Langfelder & Horvath's** R package, and a
-repository called plainly `wgcna` under an institutional organisation would read as though it *is*
-that package. And a language suffix is a promise the sibling Nextflow repositories would break —
-exactly how `kmeans-py` became wrong.
-
-The k-means implementation (`src/kmeans_py/`, `tests/`, `scripts/`, `pyproject.toml`, `ipynb/`) has
-been deleted. It remains in git history, which is the point of renaming rather than starting a new
-repository: the record of what was tried and rejected is part of the argument for what replaced it.
-
-Sibling repositories: `pvclust-py` (hierarchical clustering with AU *p*-values) and `oadr-cpep`
-(federated supervised regression).
-
-## Why `pvclust` is not used here
-
-`pvclust` attaches an approximately-unbiased *p*-value to each cluster of a dendrogram. It is the
-right tool for *"is this cluster real"* and the wrong tool for this question:
-
-1. **It answers about one axis at a time.** Two trees run separately do not produce a block.
-2. **On this orientation its p-values are anti-conservative.** Clustering patients resamples
-   proteins, and proteins are co-expressed rather than independent draws. On the patient profiles
-   every edge returned AU = 1.000 with `df = 0` — the curve was never fitted and the number printed
-   is not a p-value.
-3. **It never chooses the proteins.** Feeding it the most-variable proteins made the answer a
-   consequence of that choice, and the most-variable proteins in plasma are the abundant ones.
-
-It remains the right tool for assessing the **protein** tree, and lives in
-[`pvclust-py`](https://github.com/NIH-NLM/pvclust-py).
