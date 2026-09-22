@@ -40,7 +40,7 @@ cd endotypes-proteomics
 5. Create a directory under the data directory
 
 ```bash
-mkdir data/SLE_doi.10.5281_zenodo_20342569/`
+mkdir -p data/SLE_doi.10.5281_zenodo_20342569
 cd data/SLE_doi.10.5281_zenodo_20342569
 curl https://zenodo.org/api/records/20342569/files-archive > SLE_doi.10.5281_zenodo_2034256.zip
 unzip SLE_doi.10.5281_zenodo_2034256.zip
@@ -63,6 +63,27 @@ data/SLE_doi.10.5281_zenodo_20342569/
 └── feature_metadata.txt   SeqId -> Target / UniProt / GeneSymbol
 ```
 
+### Repository layout
+
+Two kinds of file, and the split is the point: what a run **produces** is disposable, what a run
+**depends on** is committed.
+
+```
+cohorts/     COMMITTED  the frozen splits, cohort_assignment.csv, clinical-traits.csv
+proteins/    COMMITTED  curated prior knowledge -- interferon-response-genes.json
+ipynb/       COMMITTED  the ten notebooks, and nothing else
+src/         COMMITTED  R that is not a notebook, including paths.R
+data/        ignored    the Zenodo download
+  run_artifacts/        every .rds, derived .csv and figure a run makes -- delete freely
+```
+
+`cohorts/` is committed because redrawing the split would move every number downstream of it;
+`data/run_artifacts/` is not, because `./run_all.sh` rebuilds all of it from `cohorts/`.
+
+**`src/paths.R` is the only place these locations are written down.** Every notebook opens with
+`source("../src/paths.R")` and then says `coh("R_cohort-A_meta.csv")` or `art("wgcna_A.rds")`
+rather than a relative path. Moving a directory is a one-line change there.
+
 ### Environment Setup
 
 ```bash
@@ -71,6 +92,11 @@ micromamba activate endotypes-proteomics
 Rscript -e 'IRkernel::installspec()'    # R kernel
 python -m bash_kernel.install           # Bash kernel
 ```
+
+**One dependency is not in that file.** `VarSelLCM` has no conda package, so step 04 installs it
+from CRAN in its own first cell, guarded by `requireNamespace()` so a second run is a no-op. It is
+the only thing this project installs from inside a notebook, and the environment file says so where
+the dependency would otherwise have gone.
 
 ### Notebooks
 
@@ -83,10 +109,11 @@ Each notebook reads the artifact of the previous step and then writes out its ow
 | `01_soft_threshold` | the soft-thresholding power |
 | `02_modules` | WGCNA fit, unsupervised |
 | `03_eigenproteins` | one number per patient per module |
-| `04_module_traits` | module ↔ clinical trait, BH-corrected |
+| `04_module_traits` | module ↔ clinical trait, BH-corrected; VarSelLCM on the trait list |
 | `05_endotypes` | cluster patients in module space |
 | `06_heatmap` | the patient × protein figure |
 | `07_federation` | what would cross an institutional boundary |
+| `10_federated_modules` | performs it: one pooled definition, reapplied to A, B, C |
 | `08_project_healthy` | the 86 healthy volunteers, scored on SLE-defined modules |
 | `09_project_timepoints` | *optional* — later visits of repeat donors |
 
@@ -100,6 +127,28 @@ Later visits are explored in step 09
 ### Cohorts
 
 Three cohorts A,B and C were created by randomly sampling, so we could illustrate batch correction.
+The assignment is frozen in `cohorts/cohort_assignment.csv` and read back on every run; delete that
+file to redraw, deliberately.
+
+### The two committed metadata files
+
+**`cohorts/clinical-traits.csv`** — the 15 traits step 04 tests, one row each: `name`,
+`source_column`, `type` (how to make a number of it), `group`, `description`. The `group` column is
+the load-bearing one. Antibodies to the same antigen system carry the same information — in cohort A
+anti-Sm correlates **+0.52** with anti-RNP-A and anti-Ro52 correlates **+0.73** with anti-Ro60 — so
+a hold-out has to remove a whole group at a time. Removing anti-Sm alone leaks through anti-RNP-A.
+
+**`proteins/interferon-response-genes.json`** — 37 curated interferon-stimulated genes, 19 of them
+on this SomaScan menu carrying 23 probes, each with gene symbol, UniProt, protein name and its
+SOMAmer SeqIds. It replaces `grep("14148")`, which used to appear in four notebooks: that lookup
+returned whichever module one probe fell into and called it interferon, and **could not fail**.
+`locate_ifn_module()` takes the module holding a plurality of the curated set and stops if no module
+holds at least three of them. On cohort A it recovers `ivory` with 10 of the set against 2 for the
+runner-up — a result, since the set was written from the literature rather than from this fit.
+
+Note `feature_metadata.txt` ships `GeneSymbol` **pre-disambiguated**, so multi-probe genes arrive as
+`ISG15_seq.14148.2`. Matching on a bare `"ISG15"` silently finds nothing; the JSON carries the
+column name for this reason.
 
 ### Outcomes
 
@@ -154,20 +203,53 @@ correction absorbs some of the healthy-vs-SLE difference with it. Protecting `Gr
 make any later unsupervised separation partly an artifact of having protected it. Under-detecting is
 the right direction to err.
 
-### The patient partition is weak, and interferon is not in it
+### There are no patient endotypes in cohort A
 
-Best silhouette 0.20 at k = 2 — below the ~0.25 convention for substantial structure. The split is
-driven by `blue` (1,213 proteins) and `black` (150), i.e. one dominant axis. **The interferon module
-separates the two endotypes by about 0.1 SD, essentially not at all**, despite carrying the
-strongest clinical associations. The interferon axis is orthogonal to the partition, so those
-patients are a group this clustering does not isolate. Clustering on the interferon module alone is
-the obvious next move.
+**Zero partitions pass, at any k, in either candidate module space.** Step 05 selects k by
+**prediction strength** (Tibshirani & Walther): split the patients in half, cluster each half, and
+test whether one half's centroids predict co-membership in the other. The published threshold is
+0.8. Cohort A scores:
 
-Guarded too: an unconstrained search preferred k = 4 with a cluster of 2. **A cluster of one has
-silhouette 1 by construction**, so step 05 requires the smallest cluster to hold at least ten
-patients.
+| space | k = 2 | k = 3 | k = 4 | k = 5 |
+|---|---|---|---|---|
+| all 12 associated modules | 0.65 | 0.55 | 0.46 | 0.32 |
+| 8 specific (≤ 50 proteins) | 0.69 | 0.47 | 0.40 | 0.29 |
 
-### Federation is described, not performed
+Nothing reaches 0.8, and the score **falls monotonically** with k — data with real structure at
+some k shows a peak there. Bootstrap Jaccard (Hennig) agrees: the clusters that reappear are always
+the large residual group, while the small ones sit at 0.49–0.65. The figure in step 06 draws
+k = 2…5 so this is visible — the big block never subdivides, it peels off 7 patients, then 2, then
+2 more.
+
+**Silhouette was removed, deliberately.** It grades k-means with k-means' own assumptions, it is not
+comparable across feature spaces, and on this data it preferred a partition whose small cluster
+dissolves at Jaccard 0.49. The reasoning is written out in step 05.
+
+**The interferon module is not in the split, and that is the finding.** It separates the descriptive
+groups by about 0.1 SD despite carrying the strongest clinical associations and cleanly separating
+healthy volunteers in step 08. The module with the evidence behind it is the one this clustering
+cannot see — which argues for clustering on the interferon module alone, not for a better k.
+
+### Federation, performed
+
+Step 10 runs it. Each site ships 1-D summaries only; the sites agree a panel of **p = 80 < n = 86**;
+each ships `N, S, Q, G` on that panel; the pooled correlation is exact to **4.4e-12**; one module
+definition is built from the correlation matrix alone and reapplied to A, B and C with federated
+loadings and pooled scaling. The interferon module bands the same way at all three sites — mean
+within-module r of 0.51, 0.37, 0.45 — including the two that did not define it.
+
+**The control is the point.** On a panel chosen with no prior knowledge — the top 80 proteins by
+pooled variance — only 3 of 23 ISG probes survive the reduction, and none lands in a named module.
+The signature is **not recoverable**. On the ISG-anchored panel, same budget and same release rule,
+it is.
+
+> Discovery needs the full panel and therefore one site. Confirmation federates exactly, on a panel
+> small enough to release, **provided the thing being confirmed was named in advance.**
+
+That is why `proteins/interferon-response-genes.json` is committed prior knowledge rather than a
+by-product of the fit: it is the object that makes the federated arm possible.
+
+### The algebra behind it
 
 Step 07 proves that pooling four sufficient statistics — `N`, `S`, `Q`, `G = XᵀX` — reproduces the
 pooled correlation matrix to **2.5e-12**, so WGCNA federates exactly in principle. It also states
@@ -183,12 +265,14 @@ would produce**, not a federated run.
    775 members, and the module count at identical parameters has ranged 25–52. The proteins
    co-cluster reliably; where the boundary falls does not. Until this runs, the table above
    describes cohort A.
-2. **Support layer**: bootstrap Jaccard per patient cluster (`fpc::clusterboot`); permutation
-   p-value per patient × protein block. Silhouette measures *separation*; neither it nor a q-value
-   measures whether a cluster would reappear.
-3. **VarSelLCM** replacing the hardcoded 15-trait list in step 04, with the snRNP group held out —
-   anti-Sm correlates 0.50 with anti-RNP-A and 0.44 with anti-RNP68, so holding out anti-Sm alone
-   leaks.
+2. ~~Support layer~~ — **done.** Step 05 computes prediction strength and bootstrap Jaccard, both
+   written out rather than called from `fpc`, and both reported for every k in both spaces. What is
+   still open is a permutation p-value per patient × protein *block*, as opposed to per partition.
+3. **VarSelLCM** in step 04 — *in place, runs alongside the correlation table.* The trait list moved
+   out of the code cell into `cohorts/clinical-traits.csv`, and step 04 now fits a latent class
+   model with variable selection and repeats it holding out one antigen group at a time. What is
+   still open is the *reading*: whether the traits BIC keeps are the ones the BH table finds, and
+   what it means when they disagree. The BH-corrected table remains the reported result.
 4. **Tiered WGCNA** on preserved modules above 200 proteins, one pass, no recursion.
 5. **Cluster on the interferon module alone**, since it is orthogonal to the current partition.
 6. **Finish the plasma-protein annotation** (5,401 of 6,401 reagents; the missing ones include ALB,

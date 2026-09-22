@@ -1,6 +1,12 @@
+# Paths -- cohorts/ is committed and persists, data/run_artifacts/ is regenerable.
+# See src/paths.R, which is the only place those locations are written down.
+.f    <- grep("^--file=", commandArgs(FALSE), value = TRUE)
+.here <- if (length(.f)) dirname(normalizePath(sub("^--file=", "", .f[1]))) else "src"
+source(file.path(.here, "paths.R"))
+
 suppressMessages({library(ComplexHeatmap); library(circlize); library(cluster)}); set.seed(42)
-w<-readRDS("artifacts/wgcna_A.rds"); e<-readRDS("artifacts/eigengenes_A.rds")
-sig<-readRDS("artifacts/sig_modules_A.rds"); pr<-readRDS("artifacts/projection_healthy.rds")
+w<-readRDS(art("wgcna_A.rds")); e<-readRDS(art("eigengenes_A.rds"))
+sig<-readRDS(art("sig_modules_A.rds")); pr<-readRDS(art("projection_healthy.rds"))
 X<-w$X; m<-w$meta; mods<-w$mods; ifn<-pr$ifn
 sz <- sapply(sig, function(k) sum(mods==k))
 keep <- sig[sz <= 50]                      # drop the panel-spanning modules
@@ -18,7 +24,7 @@ Z <- scale(as.matrix(X[, sel]))
 ei <- e$ME[[paste0("ME",ifn)]]
 if (mean(ei[endo=="E2"]) > mean(ei[endo=="E1"])) endo <- factor(endo, levels=c("E2","E1"))
 
-png("fig_blocks_best.png", width=2400, height=1700, res=160)
+png(art("fig_blocks_best.png"), width=2400, height=1700, res=160)
 draw(Heatmap(Z, name="z-score", col=colorRamp2(c(-2,0,2),c("#2166AC","white","#B2182B")),
   row_split=endo, column_split=factor(mods[match(sel,colnames(X))], levels=ordm),
   cluster_rows=TRUE, cluster_row_slices=FALSE, cluster_columns=TRUE,

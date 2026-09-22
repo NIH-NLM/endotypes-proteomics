@@ -30,6 +30,12 @@
 # Usage:  Rscript endotype_pipeline.R <cohort letter>      e.g. A
 # ═══════════════════════════════════════════════════════════════════════════
 
+# Paths -- cohorts/ is committed and persists, data/run_artifacts/ is regenerable.
+# See src/paths.R, which is the only place those locations are written down.
+.f    <- grep("^--file=", commandArgs(FALSE), value = TRUE)
+.here <- if (length(.f)) dirname(normalizePath(sub("^--file=", "", .f[1]))) else "src"
+source(file.path(.here, "paths.R"))
+
 suppressMessages({
   library(VarSelLCM); library(limma); library(ComplexHeatmap); library(circlize)
 })
@@ -49,9 +55,9 @@ cat("=========================================================\n")
 # Already log2-transformed and ComBat-corrected. Correction has to happen
 # before anything else, and NOT per-cluster, or you remove the signal you are
 # looking for along with the batch.
-X <- read.csv(sprintf("R_cohort-%s_log2_combat.csv", COHORT),
+X <- read.csv(coh("R_cohort-%s_log2_combat.csv", COHORT),
               row.names = 1, check.names = FALSE)
-m <- read.csv(sprintf("R_cohort-%s_meta.csv", COHORT),
+m <- read.csv(coh("R_cohort-%s_meta.csv", COHORT),
               row.names = 1, check.names = FALSE, stringsAsFactors = TRUE)
 m <- m[rownames(X), , drop = FALSE]
 cat(sprintf("  %d patients x %d proteins\n", nrow(X), ncol(X)))
@@ -137,7 +143,7 @@ if (sum(tt$adj.P.Val < 0.05) > 0.5 * nrow(tt))
   warning("more than half of all proteins are significant -- check group sizes")
 cat("  top 10:", paste(head(rownames(tt), 10), collapse = ", "), "\n")
 
-write.csv(tt, sprintf("limma_cohort-%s.csv", COHORT))
+write.csv(tt, art("limma_cohort-%s.csv", COHORT))
 sel <- head(rownames(tt), TOP_N)
 
 
@@ -179,7 +185,7 @@ ann_cols <- intersect(c(kept, "Disease_activity", "Sm_status", "Ro_52_status"),
 ha <- rowAnnotation(df = m[, ann_cols, drop = FALSE],
                     annotation_name_gp = gpar(fontsize = 8))
 
-png(sprintf("heatmap_cohort-%s.png", COHORT), width = 2000, height = 1500, res = 150)
+png(art("heatmap_cohort-%s.png", COHORT), width = 2000, height = 1500, res = 150)
 draw(Heatmap(Z,
   name = "z-score",
   col = colorRamp2(c(-2, 0, 2), c("#2166AC", "white", "#B2182B")),
@@ -197,5 +203,5 @@ cat(sprintf("  wrote heatmap_cohort-%s.png  (%d patients x %d proteins)\n",
             COHORT, nrow(Z), ncol(Z)))
 
 saveRDS(list(groups = groups, kept = kept, limma = tt),
-        sprintf("result_cohort-%s.rds", COHORT))
+        art("result_cohort-%s.rds", COHORT))
 cat("\ndone.\n")

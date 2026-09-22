@@ -19,15 +19,21 @@
 #   clinical data would be circular when the clinical data is what you want to
 #   explain.
 # ═══════════════════════════════════════════════════════════════════════════
+# Paths -- cohorts/ is committed and persists, data/run_artifacts/ is regenerable.
+# See src/paths.R, which is the only place those locations are written down.
+.f    <- grep("^--file=", commandArgs(FALSE), value = TRUE)
+.here <- if (length(.f)) dirname(normalizePath(sub("^--file=", "", .f[1]))) else "src"
+source(file.path(.here, "paths.R"))
+
 suppressMessages({library(WGCNA); library(ComplexHeatmap); library(circlize)
                   library(VarSelLCM); library(cluster)})
 options(stringsAsFactors=FALSE); set.seed(42)
 COHORT <- if (length(commandArgs(TRUE))) commandArgs(TRUE)[1] else "A"
 
-X  <- read.csv(sprintf("R_cohort-%s_log2_combat.csv",COHORT), row.names=1, check.names=FALSE)
-m  <- read.csv(sprintf("R_cohort-%s_meta.csv",COHORT), row.names=1, check.names=FALSE,
+X  <- read.csv(coh("R_cohort-%s_log2_combat.csv", COHORT), row.names=1, check.names=FALSE)
+m  <- read.csv(coh("R_cohort-%s_meta.csv", COHORT), row.names=1, check.names=FALSE,
                stringsAsFactors=TRUE)
-md <- read.csv(sprintf("wgcna_modules_%s.csv",COHORT))
+md <- read.csv(art("modules_%s.csv", COHORT))   # written by notebook 02
 m  <- m[rownames(X),,drop=FALSE]
 
 # ── 1. eigengenes: 7288 proteins -> 7 numbers per patient ────────────────
@@ -85,7 +91,7 @@ sel <- unlist(lapply(setdiff(unique(md$module), "grey"), function(mod) {
 modf <- factor(md$module[match(sel, md$protein)])
 Z <- scale(as.matrix(X[, sel]))
 
-png(sprintf("endotypes_%s.png",COHORT), width=2400, height=1600, res=150)
+png(art("endotypes_%s.png", COHORT), width=2400, height=1600, res=150)
 draw(Heatmap(Z, name="z-score",
   col=colorRamp2(c(-2,0,2), c("#2166AC","white","#B2182B")),
   row_split=endo, column_split=modf,                 # BLOCKS on both axes
@@ -100,5 +106,5 @@ draw(Heatmap(Z, name="z-score",
   row_title="endotype (k-means on module eigengenes)",
   column_title="proteins, grouped by WGCNA module"))
 invisible(dev.off())
-write.csv(data.frame(patient=rownames(ME), endotype=endo, ME), sprintf("endotypes_%s.csv",COHORT))
+write.csv(data.frame(patient=rownames(ME), endotype=endo, ME), art("endotypes_%s.csv", COHORT))
 cat(sprintf("\nwrote endotypes_%s.png\n", COHORT))

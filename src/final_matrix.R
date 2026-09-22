@@ -6,9 +6,15 @@
 #    with the labels. The slice titles are left to default to the module names,
 #    and the figure's own title goes on draw().
 #  - column_title_rot = 0 keeps those module names flat.
+# Paths -- cohorts/ is committed and persists, data/run_artifacts/ is regenerable.
+# See src/paths.R, which is the only place those locations are written down.
+.f    <- grep("^--file=", commandArgs(FALSE), value = TRUE)
+.here <- if (length(.f)) dirname(normalizePath(sub("^--file=", "", .f[1]))) else "src"
+source(file.path(.here, "paths.R"))
+
 suppressMessages({library(ComplexHeatmap); library(circlize); library(cluster)}); set.seed(42)
-w<-readRDS("artifacts/wgcna_A.rds"); e<-readRDS("artifacts/eigengenes_A.rds")
-sig<-readRDS("artifacts/sig_modules_A.rds"); pr<-readRDS("artifacts/projection_healthy.rds")
+w<-readRDS(art("wgcna_A.rds")); e<-readRDS(art("eigengenes_A.rds"))
+sig<-readRDS(art("sig_modules_A.rds")); pr<-readRDS(art("projection_healthy.rds"))
 X<-w$X; m<-w$meta; mods<-w$mods; ifn<-pr$ifn
 
 sz <- sapply(sig, function(k) sum(mods==k))
@@ -43,7 +49,7 @@ ht <- Heatmap(Z, name = "z-score",
     df = m[, c("Sm_status","Ro_60_status","dsDNA_status","C3_level","SLEDAI_2K","Disease_activity")],
     annotation_name_gp = gpar(fontsize = 8)))
 
-png("final_matrix.png", width = 2500, height = 2000, res = 160)
+png(art("final_matrix.png"), width = 2500, height = 2000, res = 160)
 draw(ht, column_title = sprintf(
        "cohort A (n=%d) -- %d proteins in %d clinically associated modules; interferon module = %s",
        nrow(X), length(sel), length(keep), ifn),
