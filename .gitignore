@@ -1,12 +1,24 @@
-# study data -- never committed
+# ── what is committed, and what is not ────────────────────────────────────
+#
+#   cohorts/    COMMITTED. The frozen splits, the cohort assignment, the
+#               clinical trait list. Redrawing them moves every downstream
+#               number, so they are not regenerated -- they persist.
+#   proteins/   COMMITTED. Curated prior knowledge: gene sets the analysis is
+#               interpreted against, not derived from.
+#   ipynb/      COMMITTED, and holds notebooks and nothing else.
+#   src/        COMMITTED. R that is not a notebook.
+#
+#   data/       NOT committed. The study download, and data/run_artifacts/,
+#               which holds everything a run can regenerate. Delete it and
+#               ./run_all.sh rebuilds it.
+
+# study data and every regenerable artifact
 data/
 
-# ipynb/ holds the notebooks, which ARE tracked. Everything in it derived from
-# the study data is not. cohort_assignment.csv is the deliberate exception:
-# it freezes cohort membership and carries no abundance values.
+# ipynb/ holds notebooks. Anything else that lands there is a stray -- the
+# cohort CSVs live in cohorts/ now, and run output in data/run_artifacts/.
 ipynb/artifacts/
 ipynb/*.csv
-!ipynb/cohort_assignment.csv
 ipynb/*.rds
 ipynb/*.png
 ipynb/*.svg

@@ -1,0 +1,16 @@
+name,source_column,type,group,transform,description
+SLEDAI_2K,SLEDAI_2K,numeric,activity,as.numeric,SLE Disease Activity Index 2000
+C3_level,C3_level,numeric,complement,as.numeric,Serum complement C3
+C4_level,C4_level,numeric,complement,as.numeric,Serum complement C4
+Duration_years,Duration_years,numeric,history,as.numeric,Years since diagnosis
+Lymphocyte_count,Lymphocyte_count,numeric,haematology,as.numeric,Absolute lymphocyte count
+uPCR,uPCR,numeric,renal,as.numeric,Urine protein/creatinine ratio
+Creatinine,Creatinine,numeric,renal,as.numeric,Serum creatinine
+Sm_status,Sm_status,binary,snRNP,Positive==1,Anti-Sm autoantibody
+RNP_68_status,RNP_68_status,binary,snRNP,Positive==1,Anti-RNP-68 autoantibody
+RNP_A_status,RNP_A_status,binary,snRNP,Positive==1,Anti-RNP-A autoantibody
+Ro_52_status,Ro_52_status,binary,RoLa,Positive==1,Anti-Ro52 (TRIM21) autoantibody
+Ro_60_status,Ro_60_status,binary,RoLa,Positive==1,Anti-Ro60 autoantibody
+La_status,La_status,binary,RoLa,Positive==1,Anti-La autoantibody
+dsDNA_status,dsDNA_status,binary,dsDNA,Positive==1,Anti-double-stranded-DNA autoantibody
+Age_band,Age_group,ordinal,demographic,index of five-year band,Age as the INDEX of its five-year band -- bands are equally spaced so this gives the same correlation a midpoint would without claiming to know anyone's age

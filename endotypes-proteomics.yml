@@ -38,7 +38,16 @@ dependencies:
   - bioconductor-complexheatmap
   - r-circlize
 
+  # 04  reading proteins/*.json, the curated gene sets
+  - r-jsonlite
+
   # support layer
   - r-fpc                                 # clusterboot, bootstrap Jaccard
   - bioconductor-impute                   # modulePreservation dependency
   - bioconductor-preprocesscore           # modulePreservation dependency
+
+# ── NOT here, on purpose ──────────────────────────────────────────────────
+# VarSelLCM has no conda package. Step 04 installs it from CRAN in its own
+# first cell, guarded by requireNamespace so a second run is a no-op. It is
+# the only dependency this project cannot declare here, and that is why it is
+# the only one installed from inside a notebook.

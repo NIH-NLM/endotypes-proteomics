@@ -1,0 +1,487 @@
+{
+  "name": "interferon-response",
+  "version": "1.0.0",
+  "description": "Curated type-I interferon-stimulated gene (ISG) set, used as a PRIOR to locate the interferon module in an unsupervised WGCNA fit. It replaces the bare SOMAmer number grep(\"14148\") that was repeated across notebooks 02, 05, 08 and 09.",
+  "why_a_prior": "The set was chosen from the interferon literature, not from module membership in this dataset. Locating a module by overlap with an independent gene set is a claim that can fail; locating it by a probe known in advance to sit in that module cannot.",
+  "panel": {
+    "assay": "SomaScan v4.1",
+    "n_reagents": 7288,
+    "record": "https://doi.org/10.5281/zenodo.20342569",
+    "probes_resolved_against": "data/SLE_doi.10.5281_zenodo_20342569/feature_metadata.txt"
+  },
+  "column_naming": "'column' is the name this probe carries in the cohort matrices. feature_metadata.txt already disambiguates multi-probe genes as SYMBOL_seqid (ISG15 -> ISG15_seq.14148.2), so 'column' equals its GeneSymbol field and 'gene_symbol' alone will NOT match colnames(X) for any multi-probe gene. Match on 'column'; 'seq_id' is the stable assay identifier.",
+  "counts": {
+    "curated_genes": 37,
+    "on_panel": 19,
+    "probes_on_panel": 23
+  },
+  "genes": [
+    {
+      "gene_symbol": "ISG15",
+      "role": "ubiquitin-like ISG15 conjugation",
+      "entrez_gene_id": "9636",
+      "uniprot": "P05161",
+      "protein": "Ubiquitin-like protein ISG15",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.14148.2",
+          "target": "UCRP",
+          "column": "ISG15_seq.14148.2"
+        },
+        {
+          "seq_id": "seq.14151.4",
+          "target": "UCRP",
+          "column": "ISG15_seq.14151.4"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "USP18",
+      "role": "ISG15 protease, negative regulator",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "HERC5",
+      "role": "ISG15 E3 ligase",
+      "entrez_gene_id": "51191",
+      "uniprot": "Q9UII4",
+      "protein": "E3 ISG15--protein ligase HERC5",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.12934.1",
+          "target": "HERC5",
+          "column": "HERC5"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "DTX3L",
+      "role": "ISG15/ADP-ribosylation E3 ligase",
+      "entrez_gene_id": "151636",
+      "uniprot": "Q8TDB6",
+      "protein": "E3 ubiquitin-protein ligase DTX3L",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.11643.73",
+          "target": "DTX3L",
+          "column": "DTX3L"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "MX1",
+      "role": "antiviral GTPase",
+      "entrez_gene_id": "4599",
+      "uniprot": "P20591",
+      "protein": "Interferon-induced GTP-binding protein Mx1",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.17460.51",
+          "target": "Mx1",
+          "column": "MX1"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "MX2",
+      "role": "antiviral GTPase",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "OAS1",
+      "role": "2'-5' oligoadenylate synthase",
+      "entrez_gene_id": "4938",
+      "uniprot": "P00973",
+      "protein": "2'-5'-oligoadenylate synthase 1",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.10361.25",
+          "target": "OAS1",
+          "column": "OAS1"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "OAS2",
+      "role": "2'-5' oligoadenylate synthase",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "OAS3",
+      "role": "2'-5' oligoadenylate synthase",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "OASL",
+      "role": "2'-5' oligoadenylate synthase-like",
+      "entrez_gene_id": "8638",
+      "uniprot": "Q15646",
+      "protein": "2'-5'-oligoadenylate synthetase like protein",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.25941.4",
+          "target": "OA synthetase",
+          "column": "OASL"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "RSAD2",
+      "role": "viperin",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "IFIT1",
+      "role": "IFIT family",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "IFIT2",
+      "role": "IFIT family",
+      "entrez_gene_id": "3433",
+      "uniprot": "P09913",
+      "protein": "Interferon-induced protein with tetratricopeptide repeats 2",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.9853.3",
+          "target": "IFIT2",
+          "column": "IFIT2"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "IFIT3",
+      "role": "IFIT family",
+      "entrez_gene_id": "3437",
+      "uniprot": "O14879",
+      "protein": "Interferon-induced protein with tetratricopeptide repeats 3",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.13642.90",
+          "target": "CIG49",
+          "column": "IFIT3"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "IFI6",
+      "role": "IFN-alpha inducible",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "IFI27",
+      "role": "IFN-alpha inducible",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "IFI44",
+      "role": "IFN-induced",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "IFI44L",
+      "role": "IFN-induced",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "IFI16",
+      "role": "cytosolic DNA sensor",
+      "entrez_gene_id": "3428",
+      "uniprot": "Q16666",
+      "protein": "Gamma-interferon-inducible protein 16:Isoform 2, Hematopoietic expression, interferon-inducible nature, and nuclear localization 2",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.12893.159",
+          "target": "IP16:HIN 2",
+          "column": "IFI16_seq.12893.159"
+        },
+        {
+          "seq_id": "seq.13940.19",
+          "target": "IP16:HIN 1",
+          "column": "IFI16_seq.13940.19"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "DDX58",
+      "role": "RIG-I, cytosolic RNA sensor",
+      "entrez_gene_id": "23586",
+      "uniprot": "O95786",
+      "protein": "Probable ATP-dependent RNA helicase DDX58",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.12382.2",
+          "target": "DDX58",
+          "column": "DDX58"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "IFIH1",
+      "role": "MDA5, cytosolic RNA sensor",
+      "entrez_gene_id": "64135",
+      "uniprot": "Q9BYX4",
+      "protein": "Interferon-induced helicase C domain-containing protein 1",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.20195.13",
+          "target": "IFIH1",
+          "column": "IFIH1"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "STAT1",
+      "role": "JAK-STAT signal transducer",
+      "entrez_gene_id": "6772",
+      "uniprot": "P42224",
+      "protein": "Signal transducer and activator of transcription 1-alpha/beta",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.10370.21",
+          "target": "STAT1",
+          "column": "STAT1_seq.10370.21"
+        },
+        {
+          "seq_id": "seq.12351.25",
+          "target": "STAT1",
+          "column": "STAT1_seq.12351.25"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "STAT2",
+      "role": "JAK-STAT signal transducer",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "IRF7",
+      "role": "IFN regulatory factor",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "IRF9",
+      "role": "ISGF3 component",
+      "entrez_gene_id": "10379",
+      "uniprot": "Q00978",
+      "protein": "Interferon regulatory factor 9",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.12439.67",
+          "target": "ISGF3",
+          "column": "IRF9"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "GBP1",
+      "role": "guanylate-binding protein",
+      "entrez_gene_id": "2633",
+      "uniprot": "P32455",
+      "protein": "Guanylate-binding protein 1",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.15326.64",
+          "target": "GBP1",
+          "column": "GBP1"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "GBP2",
+      "role": "guanylate-binding protein",
+      "entrez_gene_id": "2634",
+      "uniprot": "P32456",
+      "protein": "Guanylate-binding protein 2",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.18891.98",
+          "target": "GBP2",
+          "column": "GBP2"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "CXCL10",
+      "role": "IP-10, IFN-induced chemokine",
+      "entrez_gene_id": "3627",
+      "uniprot": "P02778",
+      "protein": "C-X-C motif chemokine 10",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.4141.79",
+          "target": "IP-10",
+          "column": "CXCL10"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "CXCL11",
+      "role": "I-TAC, IFN-induced chemokine",
+      "entrez_gene_id": "6373",
+      "uniprot": "O14625",
+      "protein": "C-X-C motif chemokine 11",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.18171.25",
+          "target": "I-TAC",
+          "column": "CXCL11_seq.18171.25"
+        },
+        {
+          "seq_id": "seq.3038.9",
+          "target": "I-TAC",
+          "column": "CXCL11_seq.3038.9"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "SIGLEC1",
+      "role": "CD169, sialoadhesin",
+      "entrez_gene_id": "6614",
+      "uniprot": "Q9BZZ2",
+      "protein": "Sialoadhesin",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.4464.10",
+          "target": "Sialoadhesin",
+          "column": "SIGLEC1"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "BST2",
+      "role": "tetherin",
+      "entrez_gene_id": "684",
+      "uniprot": "Q10589",
+      "protein": "Bone marrow stromal antigen 2",
+      "on_panel": true,
+      "somascan_probes": [
+        {
+          "seq_id": "seq.8832.55",
+          "target": "BST-2",
+          "column": "BST2"
+        }
+      ]
+    },
+    {
+      "gene_symbol": "LY6E",
+      "role": "IFN-inducible GPI protein",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "XAF1",
+      "role": "XIAP-associated factor 1",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "EIF2AK2",
+      "role": "PKR",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "SAMD9",
+      "role": "IFN-induced",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "SAMD9L",
+      "role": "IFN-induced",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    },
+    {
+      "gene_symbol": "PARP9",
+      "role": "ADP-ribosyltransferase",
+      "entrez_gene_id": null,
+      "uniprot": null,
+      "protein": null,
+      "on_panel": false,
+      "somascan_probes": []
+    }
+  ]
+}
