@@ -126,9 +126,10 @@ Only `data/` is required from outside the repository. Everything else is either 
 | `11_modules_per_cohort` | the same fit for B and C — *slow, two full WGCNA runs* |
 | `12_panels_per_cohort` | per-cohort panels under three trait conditions |
 | `13_cluster_both_axes` | ward.D2 / Minkowski and k-means, both axes, modules not imposed |
-| `14_heatmaps` | two-tier figures: overview, then labelled zooms |
+| `14_heatmaps` | two-tier figures, both clustering arms, shared trait legend |
 | `15_project_and_federate` | cohort B by projection, and the federation arithmetic |
 | `16_cohort_diagnostics` | why the three cohorts differ |
+| `17_federate_per_module` | federation performed, one module at a time |
 | `08_project_healthy` | the 86 healthy volunteers, scored on SLE-defined modules |
 | `09_project_timepoints` | *optional* — later visits of repeat donors |
 
@@ -306,10 +307,24 @@ labels never imposed, and the protein clusters still agree with the WGCNA module
 and **0.886** in C. B's ARI is 0.000 by construction: its panel is one module, so the label vector
 is constant.
 
-**Projection carries structure into B; federation cannot.** A→B recovers 5 associations, 4 of them
-on `bisque4`, a 10-protein renal module — the same axis B found alone and the same one that
-replicated into C. The projection gate holds at r = 1.0000. Federation fails for all nine panels:
-the rule is `p < n = 86` and the smallest panel is 430 proteins.
+**Projection carries structure into B, and so does federation — one module at a time.** A→B
+projection recovers 5 associations, 4 of them on `bisque4`, a 10-protein renal module. The gate
+holds at r = 1.0000.
+
+Federation fails only if you try to release a whole panel as one Gram, which nothing requires.
+Counted in **proteins rather than probes** and released **one module per run**, 9 of A's 11
+trait-associated modules and 3 of C's 4 clear `p < n = 86` — `bisque4` is 7 proteins, `ivory` 12,
+`mediumpurple3` 13. Step 17 performs it, exact to 4e-12.
+
+**What federation buys, in one number.** Cohort B alone yields one trait-associated module and its
+only signal is renal. Scored on **C's** federated interferon module `mediumpurple3` — 13 proteins,
+a definition B had no part in making — B shows **nine** associations at FDR 5%, all autoantibody:
+anti-RNP-68, anti-Sm, anti-Ro60, anti-Ro52, anti-La, anti-RNP-A. The axis was in B's data and B's
+own discovery could not resolve it.
+
+**One module per release, deliberately.** Nine separate Grams totalling 222 proteins is not
+obviously the same disclosure as one 222-protein Gram. Step 17 is built so that question never has
+to be answered.
 
 **The cohorts differ by network, not by patients.** Batch composition is identical by construction
 (69/18, 69/18, 69/17) and trait spread is close throughout. What differs is granularity: A gives 52
