@@ -103,6 +103,15 @@ the dependency would otherwise have gone.
 For ease of analysis and understanding, a notebook was created for each of the separate execution steps
 Each notebook reads the artifact of the previous step and then writes out its own output.
 
+**The sequence runs from a clean clone.** After the download above, `./run_all.sh` executes steps
+00–07 and 10–16 in order with no manual intervention; `--optional` adds 08 and 09. Verified by
+deleting `data/run_artifacts/` entirely and re-running: every step completes, and **`cohorts/`
+regenerates bit-identically** — step 00 reads the committed `cohort_assignment.csv` and reseeds
+from it, so the split never moves.
+
+Only `data/` is required from outside the repository. Everything else is either committed
+(`cohorts/`, `proteins/`, `ipynb/`, `src/`) or regenerated into `data/run_artifacts/`.
+
 | notebook | does |
 |---|---|
 | `00_prepare_data` | Zenodo → filter → log2 → ComBat → annotate → de-duplicate → split |
@@ -114,11 +123,12 @@ Each notebook reads the artifact of the previous step and then writes out its ow
 | `06_heatmap` | the patient × protein figure |
 | `07_federation` | what would cross an institutional boundary |
 | `10_federated_modules` | performs it: one pooled definition, reapplied to A, B, C |
-| `11_panels_per_cohort` | per-cohort panels under three trait conditions |
-| `12_cluster_both_axes` | ward.D2 / Minkowski and k-means, both axes, modules not imposed |
-| `13_heatmaps` | two-tier figures: overview, then labelled zooms |
-| `14_project_and_federate` | cohort B by projection, and the federation arithmetic |
-| `15_cohort_diagnostics` | why the three cohorts differ |
+| `11_modules_per_cohort` | the same fit for B and C — *slow, two full WGCNA runs* |
+| `12_panels_per_cohort` | per-cohort panels under three trait conditions |
+| `13_cluster_both_axes` | ward.D2 / Minkowski and k-means, both axes, modules not imposed |
+| `14_heatmaps` | two-tier figures: overview, then labelled zooms |
+| `15_project_and_federate` | cohort B by projection, and the federation arithmetic |
+| `16_cohort_diagnostics` | why the three cohorts differ |
 | `08_project_healthy` | the 86 healthy volunteers, scored on SLE-defined modules |
 | `09_project_timepoints` | *optional* — later visits of repeat donors |
 
@@ -281,6 +291,12 @@ modules: A's `blue` (16.6%) and C's `turquoise` (36.4%).
 | A | 52 | 12 | 765 probes (727 proteins) |
 | B | 23 | **1** (`brown`, renal) | 490 probes (430 proteins) |
 | C | 46 | 4 | 748 probes (664 proteins) |
+
+Step 11 refits B and C with parameters identical to step 02's cohort-A fit, so any difference
+between cohorts is a difference in the data rather than in the parameters. The three fits are not
+alike: B resolves into **less than half** as many modules as A and leaves 64% more protein
+unassigned. Module discovery at n ≈ 87 is not stable across a random split of the same donors, and
+that is the governing caveat on everything in steps 12–16.
 
 **Cohort B has one module, and it is not a multiple-testing artifact** — cutting its tests from 345
 to 138 via VarSelLCM leaves it at one. B's only clinical signal is renal.
