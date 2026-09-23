@@ -114,6 +114,11 @@ Each notebook reads the artifact of the previous step and then writes out its ow
 | `06_heatmap` | the patient × protein figure |
 | `07_federation` | what would cross an institutional boundary |
 | `10_federated_modules` | performs it: one pooled definition, reapplied to A, B, C |
+| `11_panels_per_cohort` | per-cohort panels under three trait conditions |
+| `12_cluster_both_axes` | ward.D2 / Minkowski and k-means, both axes, modules not imposed |
+| `13_heatmaps` | two-tier figures: overview, then labelled zooms |
+| `14_project_and_federate` | cohort B by projection, and the federation arithmetic |
+| `15_cohort_diagnostics` | why the three cohorts differ |
 | `08_project_healthy` | the 86 healthy volunteers, scored on SLE-defined modules |
 | `09_project_timepoints` | *optional* — later visits of repeat donors |
 
@@ -257,6 +262,44 @@ the blocker: `rank(G) = min(n, p)`, and with 7,288 proteins against ~87 patients
 the Gram matrix can be inverted back toward the rows. The panel must be reduced below n before any
 Gram leaves a site. Everything here used pooled raw data and is a **simulation of what federation
 would produce**, not a federated run.
+
+## Per-cohort discovery (steps 11–15)
+
+Each cohort analysed separately, nothing from one selecting anything in another. Panels come from
+WGCNA modules that survive a BH test against patient attributes, minus one stated size criterion:
+
+> A module is excluded if it contains **≥10% of the assayed probes** (≥729 of 7,288), because its
+> eigengene then approximates the first principal component of the whole panel and correlates with
+> clinical variables through overall signal level rather than shared mechanism.
+
+The threshold is a judgment, not a derived quantity, and is placed in the **8.6%–16.6% gap** in the
+observed size distribution, where every value gives identical results. It excludes exactly two
+modules: A's `blue` (16.6%) and C's `turquoise` (36.4%).
+
+| cohort | modules | trait-associated | panel |
+|---|---|---|---|
+| A | 52 | 12 | 765 probes (727 proteins) |
+| B | 23 | **1** (`brown`, renal) | 490 probes (430 proteins) |
+| C | 46 | 4 | 748 probes (664 proteins) |
+
+**Cohort B has one module, and it is not a multiple-testing artifact** — cutting its tests from 345
+to 138 via VarSelLCM leaves it at one. B's only clinical signal is renal.
+
+**The modules largely survive being ignored.** Steps 12–13 cluster both axes freely, with module
+labels never imposed, and the protein clusters still agree with the WGCNA modules at ARI 0.80 in A
+and **0.886** in C. B's ARI is 0.000 by construction: its panel is one module, so the label vector
+is constant.
+
+**Projection carries structure into B; federation cannot.** A→B recovers 5 associations, 4 of them
+on `bisque4`, a 10-protein renal module — the same axis B found alone and the same one that
+replicated into C. The projection gate holds at r = 1.0000. Federation fails for all nine panels:
+the rule is `p < n = 86` and the smallest panel is 430 proteins.
+
+**The cohorts differ by network, not by patients.** Batch composition is identical by construction
+(69/18, 69/18, 69/17) and trait spread is close throughout. What differs is granularity: A gives 52
+modules with 1,016 probes unassigned and a largest module of 30.4%; B gives 23, with 1,667
+unassigned and a largest of 38.2%. Fewer, coarser eigengenes means less that is specific enough to
+correlate with anything.
 
 ## Open work, in priority order
 

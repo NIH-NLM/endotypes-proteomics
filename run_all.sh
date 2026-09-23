@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The machine path. The same notebooks are the human path in JupyterLab.
 #
-#   ./run_all.sh              steps 00-07 and 10, the pipeline
+#   ./run_all.sh              steps 00-07 and 10-15, the pipeline
 #   ./run_all.sh --optional   also runs 08 and 09, the projections
 #
 # Notebooks execute in place, so the committed file carries its own output.
@@ -13,7 +13,9 @@ set -euo pipefail
 cd "$(dirname "$0")/ipynb"
 
 STEPS=(00_prepare_data 01_soft_threshold 02_modules 03_eigenproteins \
-       04_module_traits 05_endotypes 06_heatmap 07_federation 10_federated_modules)
+       04_module_traits 05_endotypes 06_heatmap 07_federation 10_federated_modules \
+       11_panels_per_cohort 12_cluster_both_axes 13_heatmaps \
+       14_project_and_federate 15_cohort_diagnostics)
 [[ "${1:-}" == "--optional" ]] && STEPS+=(08_project_healthy 09_project_timepoints)
 
 for nb in "${STEPS[@]}"; do
