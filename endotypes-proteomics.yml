@@ -17,6 +17,9 @@ dependencies:
   # ── notebook host and kernels ───────────────────────────────────────────
   - jupyterlab
   - nbconvert                  # run_all.sh, the machine path
+  - jupyter_core               # provides the `jupyter` command itself -- run_all.sh
+                               # calls `jupyter nbconvert`, and without this the
+                               # entry point arrives only as a jupyterlab dependency
   - r-irkernel                 # R kernel
   - bash_kernel                # Bash kernel
 
