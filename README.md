@@ -126,10 +126,11 @@ Only `data/` is required from outside the repository. Everything else is either 
 | `11_modules_per_cohort` | the same fit for B and C — *slow, two full WGCNA runs* |
 | `12_panels_per_cohort` | per-cohort panels under three trait conditions |
 | `13_cluster_both_axes` | ward.D2 / Minkowski and k-means, both axes, modules not imposed |
-| `14_heatmaps` | two-tier figures, both clustering arms, shared trait legend |
-| `15_project_and_federate` | cohort B by projection, and the federation arithmetic |
-| `16_cohort_diagnostics` | why the three cohorts differ |
-| `17_federate_per_module` | federation performed, one module at a time |
+| `14_heatmaps` | two-tier figures: overview, then labelled zooms, shared trait legend |
+| `15_kmeans_arm` | the k-means comparator, drawn against the hierarchical arm |
+| `16_project_and_federate` | cohort B by projection, and the federation arithmetic |
+| `17_cohort_diagnostics` | why the three cohorts differ |
+| `18_federate_per_module` | federation performed, one module at a time |
 | `08_project_healthy` | the 86 healthy volunteers, scored on SLE-defined modules |
 | `09_project_timepoints` | *optional* — later visits of repeat donors |
 
