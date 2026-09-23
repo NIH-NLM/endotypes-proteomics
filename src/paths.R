@@ -56,6 +56,34 @@ read_traits <- function() {
   t
 }
 
+# ── probes vs proteins ────────────────────────────────────────────────────
+#
+# A SomaScan column is a PROBE (a SOMAmer), not a protein. Several probes can
+# target the same protein: ISG15 has two, STAT1 has two. feature_metadata.txt
+# ships GeneSymbol already disambiguated as SYMBOL_seqid, so the column name
+# carries the probe identity and the gene has to be recovered by stripping it.
+#
+# This matters for the federation release rule. That rule is p < n, and p is a
+# count of independent measurements -- two probes for ISG15 are not two
+# proteins. Counting probes inflates p and makes a panel look less releasable
+# than it is. Across the whole menu: 7,288 probes -> 6,399 gene symbols.
+
+probe_to_gene <- function(columns) sub("_seq\\.[0-9.]+$", "", columns)
+
+# Distinct proteins behind a set of probe columns. `by` is "gene" (the default,
+# from the column name alone, no file read) or "uniprot" (authoritative, needs
+# the study download).
+n_proteins <- function(columns, by = c("gene", "uniprot")) {
+  by <- match.arg(by)
+  if (by == "gene") return(length(unique(probe_to_gene(columns))))
+  fm <- read.delim(raw("feature_metadata.txt"), check.names = FALSE)
+  length(unique(setNames(fm$UniProt, fm$GeneSymbol)[columns]))
+}
+
+# "n probes (m proteins)", for every size this pipeline prints.
+size_str <- function(columns)
+  sprintf("%d probes (%d proteins)", length(columns), n_proteins(columns))
+
 # The curated interferon-stimulated gene set. Returns the panel COLUMN names,
 # because feature_metadata.txt already disambiguates multi-probe genes as
 # SYMBOL_seqid -- "ISG15" alone matches no column, "ISG15_seq.14148.2" does.
