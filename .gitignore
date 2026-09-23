@@ -27,6 +27,7 @@ ipynb/*.html
 ipynb/.ipynb_checkpoints/
 
 # R
+permutedStats-*.RData          # WGCNA modulePreservation cache
 .Rhistory
 .RData
 .Rproj.user/
