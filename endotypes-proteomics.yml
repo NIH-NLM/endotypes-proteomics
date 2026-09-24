@@ -30,7 +30,7 @@ dependencies:
   - bioconductor-sva                      # ComBat
 
   # 01-03  soft threshold, modules, eigenproteins
-  - r-wgcna
+  # (WGCNA itself is NOT here -- see the note at the end of this file)
   - r-dynamictreecut                      # WGCNA dependency, pinned so it is visible
   - r-fastcluster
 
@@ -50,7 +50,18 @@ dependencies:
   - bioconductor-preprocesscore           # modulePreservation dependency
 
 # ── NOT here, on purpose ──────────────────────────────────────────────────
-# VarSelLCM has no conda package. Step 04 installs it from CRAN in its own
-# first cell, guarded by requireNamespace so a second run is a no-op. It is
-# the only dependency this project cannot declare here, and that is why it is
-# the only one installed from inside a notebook.
+# Two packages cannot be declared here and are installed from CRAN instead, by
+# ensure_pkg() in src/paths.R. Every notebook that needs one calls it before
+# library(), so each notebook still resolves its own dependencies and runs
+# standalone under the R kernel.
+#
+#   WGCNA      bioconda ships r-wgcna for linux-64 and osx-64 but NOT for
+#              osx-arm64. Declaring it makes the environment unsolvable on
+#              Apple Silicon -- "r-wgcna does not exist". Its own dependencies
+#              (dynamicTreeCut, fastcluster, impute, preprocessCore) ARE conda
+#              packages and stay declared above, so the CRAN install is quick
+#              and does not compile them again.
+#   VarSelLCM  has no conda package on any platform.
+#
+# Both are guarded by requireNamespace(), so a second run is a no-op and
+# touches no network.
