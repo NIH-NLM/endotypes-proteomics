@@ -131,6 +131,8 @@ Only `data/` is required from outside the repository. Everything else is either 
 | `16_project_and_federate` | cohort B by projection, and the federation arithmetic |
 | `17_cohort_diagnostics` | why the three cohorts differ |
 | `18_federate_per_module` | federation performed, one module at a time |
+| `19_federation_benefit` | does it help? three levels, measured |
+| `20_module_preservation` | do the modules exist in the other cohorts? |
 | `08_project_healthy` | the 86 healthy volunteers, scored on SLE-defined modules |
 | `09_project_timepoints` | *optional* — later visits of repeat donors |
 
@@ -280,19 +282,32 @@ would produce**, not a federated run.
 Each cohort analysed separately, nothing from one selecting anything in another. Panels come from
 WGCNA modules that survive a BH test against patient attributes, minus one stated size criterion:
 
-> A module is excluded if it contains **≥10% of the assayed probes** (≥729 of 7,288), because its
-> eigengene then approximates the first principal component of the whole panel and correlates with
-> clinical variables through overall signal level rather than shared mechanism.
+> A module is excluded if it contains **≥1% of the assayed probes** (≥73 of 7,288), because a
+> module much larger than that approximates a leading principal component of the whole panel and
+> dominates the Euclidean geometry, preventing small modules from resolving.
 
-The threshold is a judgment, not a derived quantity, and is placed in the **8.6%–16.6% gap** in the
-observed size distribution, where every value gives identical results. It excludes exactly two
-modules: A's `blue` (16.6%) and C's `turquoise` (36.4%).
+**The threshold is chosen by a scan, not asserted.** Step 12 reports, for each candidate cut, how
+well *free* hierarchical clustering on the protein axis recovers the WGCNA modules it was never
+given — best Jaccard of any protein cluster against `ivory` (interferon) and `bisque4` (renal):
 
-| cohort | modules | trait-associated | panel |
+| panel | k=3 | k=4 | k=5 | k=6 | k=7 | k=8 |
+|---|---|---|---|---|---|---|
+| <10% (765 probes) | 0.08 | 0.11 | 0.11 | 0.14 | 0.14 | **0.14** |
+| <5% (392) | 0.09 | 0.15 | 0.39 | 0.39 | 0.39 | 1.00 |
+| <2% (242) | 0.15 | 0.39 | 0.39 | **1.00** | 1.00 | 1.00 |
+| **<1% (164)** | 0.39 | 0.39 | **1.00** | 1.00 | 1.00 | 1.00 |
+
+At a 10% cut `ivory` is **never** recovered at any k. At 1% it is exact from k = 5 and `bisque4`
+from k = 7 — which is why steps 13–15 run **k = 3…8** on both axes rather than stopping at 5.
+Caveat stated plainly: choosing the panel on which free clustering reproduces the modules is a
+**consistency** criterion and mildly self-confirming; the defence is the mechanism, not the
+prettier answer.
+
+| cohort | modules | trait-associated | panel at the 1% cut |
 |---|---|---|---|
-| A | 52 | 12 | 765 probes (727 proteins) |
-| B | 23 | **1** (`brown`, renal) | 490 probes (430 proteins) |
-| C | 46 | 4 | 748 probes (664 proteins) |
+| A | 52 | 12 | **164 probes (144 proteins), 8 modules** |
+| B | 23 | 1 (`brown`, renal, 6.7%) | **empty** — its one module exceeds the cut |
+| C | 46 | 4 | 119 probes (110 proteins), 3 modules |
 
 Step 11 refits B and C with parameters identical to step 02's cohort-A fit, so any difference
 between cohorts is a difference in the data rather than in the parameters. The three fits are not
@@ -303,10 +318,26 @@ that is the governing caveat on everything in steps 12–16.
 **Cohort B has one module, and it is not a multiple-testing artifact** — cutting its tests from 345
 to 138 via VarSelLCM leaves it at one. B's only clinical signal is renal.
 
-**The modules largely survive being ignored.** Steps 12–13 cluster both axes freely, with module
-labels never imposed, and the protein clusters still agree with the WGCNA modules at ARI 0.80 in A
-and **0.886** in C. B's ARI is 0.000 by construction: its panel is one module, so the label vector
-is constant.
+**The modules largely survive being ignored.** Steps 13–15 cluster both axes freely, module labels
+never imposed. Cohort A reaches **ARI 0.985 at k = 8** and reproduces **6 of its 8 modules exactly**
+(Jaccard 1.00). `fig14_final_heatmap_A.png` is that result: every column block carries the name of
+the module a free clustering found there.
+
+**And the modules are preserved across cohorts (step 20).** `WGCNA::modulePreservation`, A as
+reference, 200 permutations, read against the `gold` random-module null at Z ≈ 9:
+
+| | in B | in C |
+|---|---|---|
+| preserved above the null | **7 of 8** | **7 of 8** |
+| `ivory` (interferon) | Z = 10.0 | Z = 14.7, medianRank 1 |
+| `brown4` | 5.9 — fails | 6.3 — fails |
+
+**This explains why the cohorts looked so different.** A's modules *are* present in B's correlation
+structure; B simply did not cut them out. The 52-vs-23 module count is a property of
+`blockwiseModules` and its parameters, not of the biology.
+
+Preservation is about proteins, significance is about patients, and step 20 never calls a coherent
+protein cluster "significant".
 
 **Projection carries structure into B, and so does federation — one module at a time.** A→B
 projection recovers 5 associations, 4 of them on `bisque4`, a 10-protein renal module. The gate
@@ -317,11 +348,26 @@ Counted in **proteins rather than probes** and released **one module per run**, 
 trait-associated modules and 3 of C's 4 clear `p < n = 86` — `bisque4` is 7 proteins, `ivory` 12,
 `mediumpurple3` 13. Step 17 performs it, exact to 4e-12.
 
-**What federation buys, in one number.** Cohort B alone yields one trait-associated module and its
-only signal is renal. Scored on **C's** federated interferon module `mediumpurple3` — 13 proteins,
-a definition B had no part in making — B shows **nine** associations at FDR 5%, all autoantibody:
-anti-RNP-68, anti-Sm, anti-Ro60, anti-Ro52, anti-La, anti-RNP-A. The axis was in B's data and B's
-own discovery could not resolve it.
+**What federation buys — measured, in step 19.** Every eligible module scored in every cohort at
+three levels: the cohort alone, plus the origin's **protein list**, plus **federated loadings**.
+
+| | A | B | C | total |
+|---|---|---|---|---|
+| alone | 29 | **0** | 8 | 37 |
+| + shared protein list | 44 | 11 | 21 | **76** |
+| + federated loadings | 44 | 16 | 20 | 80 |
+
+**The shared definition is worth everything; the federated loadings are worth nothing.** Cohort B
+goes from 0 to 11 simply by being told which proteins form the module — its own fit contains no
+such module. The further 76 → 80 is not a gain: the two scores correlate at **0.968–1.000**,
+`|Δ|r|| > 0.05` in only **2 of 540** cells, and the traits that cross FDR 5% do so with unchanged
+or *smaller* effect sizes because nine of them sit piled at q ≈ 0.046–0.052 and BH reorders them
+together.
+
+That matters for design, because the two levels have very different privacy costs. **A protein
+list is a list of names.** A Gram matrix must satisfy `p < n` and be released one module at a time.
+Here the privacy-cheapest option delivers essentially all of the benefit — at n ≈ 87, on modules of
+7–78 proteins, where PC1 is already well determined.
 
 **One module per release, deliberately.** Nine separate Grams totalling 222 proteins is not
 obviously the same disclosure as one 222-protein Gram. Step 17 is built so that question never has
