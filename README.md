@@ -87,11 +87,19 @@ rather than a relative path. Moving a directory is a one-line change there.
 ### Environment Setup
 
 ```bash
-micromamba env create -f endotypes-proteomics.yml
-micromamba activate endotypes-proteomics
-Rscript -e 'IRkernel::installspec()'    # R kernel
-python -m bash_kernel.install           # Bash kernel
+mamba env create -f endotypes-proteomics.yml     # or micromamba / conda
+mamba activate endotypes-proteomics
+Rscript -e 'IRkernel::installspec()'             # R kernel
+python -m bash_kernel.install                    # Bash kernel
+jupyter lab
 ```
+
+**Two R packages are not in the environment file, deliberately.** `WGCNA` has no
+`osx-arm64` conda build — declaring it makes the environment unsolvable on Apple Silicon — and
+`VarSelLCM` has no conda package on any platform. Both are installed from CRAN by `ensure_pkg()`
+in `src/paths.R`, which every notebook that needs them calls before `library()`. Nothing extra to
+run: open any notebook under the R kernel and it resolves its own dependencies, installing only
+what is missing and touching no network on a second run.
 
 **One dependency is not in that file.** `VarSelLCM` has no conda package, so step 04 installs it
 from CRAN in its own first cell, guarded by `requireNamespace()` so a second run is a no-op. It is

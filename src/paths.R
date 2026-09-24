@@ -56,6 +56,30 @@ read_traits <- function() {
   t
 }
 
+# ── dependencies a conda environment cannot carry ─────────────────────────
+#
+# Two packages this project needs are not installable from conda on every
+# platform:
+#
+#   WGCNA      bioconda ships r-wgcna for linux-64 and osx-64 but NOT for
+#              osx-arm64, so an Apple Silicon environment cannot solve with it
+#              declared. It is on CRAN and installs there.
+#   VarSelLCM  has no conda package at all.
+#
+# Every notebook that needs one calls ensure_pkg() before library(), so each
+# notebook resolves its own dependencies and runs standalone under the R
+# kernel in JupyterLab. Guarded by requireNamespace(), so a second run is a
+# no-op and touches no network.
+
+ensure_pkg <- function(pkg, repos = "https://cloud.r-project.org") {
+  if (requireNamespace(pkg, quietly = TRUE)) return(invisible(TRUE))
+  message("installing ", pkg, " from CRAN (no conda package for this platform)")
+  install.packages(pkg, repos = repos, quiet = TRUE)
+  if (!requireNamespace(pkg, quietly = TRUE))
+    stop(pkg, " is required and could not be installed", call. = FALSE)
+  invisible(TRUE)
+}
+
 # ── probes vs proteins ────────────────────────────────────────────────────
 #
 # A SomaScan column is a PROBE (a SOMAmer), not a protein. Several probes can
