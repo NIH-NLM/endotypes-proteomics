@@ -1,9 +1,21 @@
 # Environment for endotypes-proteomics.
 #
-#   micromamba env create -f endotypes-proteomics.yml    (or conda/mamba)
-#   micromamba activate endotypes-proteomics
+# Linux, including the ADAPTS / Lifebit platform -- everything is a native binary:
+#
+#   mamba env create -f endotypes-proteomics.yml         (or micromamba / conda)
+#   mamba activate endotypes-proteomics
 #   Rscript -e 'IRkernel::installspec()'                 # register the R kernel
 #   python -m bash_kernel.install                        # register the Bash kernel
+#   jupyter lab
+#
+# Apple Silicon -- bioconda has no osx-arm64 build of r-wgcna, so build the whole
+# environment for osx-64 and let Rosetta 2 run it:
+#
+#   CONDA_SUBDIR=osx-64 mamba env create -f endotypes-proteomics.yml
+#   mamba activate endotypes-proteomics
+#   conda config --env --set subdir osx-64               # pin later installs too
+#   Rscript -e 'IRkernel::installspec()'
+#   python -m bash_kernel.install
 #   jupyter lab
 #
 # All analysis is R. JupyterLab, nbconvert and bash_kernel are Python packages,
@@ -13,6 +25,9 @@ name: endotypes-proteomics
 channels:
   - conda-forge
   - bioconda
+  - nodefaults        # ignore the user's global `defaults` / pkgs/main channels.
+                      # Solving against repo.anaconda.com as well made one install
+                      # run for 88 minutes without finishing.
 dependencies:
   # ── notebook host and kernels ───────────────────────────────────────────
   - jupyterlab
@@ -30,9 +45,20 @@ dependencies:
   - bioconductor-sva                      # ComBat
 
   # 01-03  soft threshold, modules, eigenproteins
-  # (WGCNA itself is NOT here -- see the note at the end of this file)
+  - r-wgcna                               # bioconda binary: linux-64 and osx-64.
+                                          # No osx-arm64 build -- Apple Silicon must
+                                          # create this env with CONDA_SUBDIR=osx-64.
   - r-dynamictreecut                      # WGCNA dependency, pinned so it is visible
   - r-fastcluster
+  - r-hmisc                               # WGCNA dependency, as a binary rather
+                                          # than something compiled at install time
+
+  # ── the toolchain ───────────────────────────────────────────────────────
+  # VarSelLCM is the one package installed from CRAN, and it contains C++.
+  # conda's R invokes a conda compiler BY NAME (e.g. arm64-apple-darwin20.0.0-clang)
+  # and reports "command not found" if it is absent, so a source install fails
+  # without this. Everything else here is a prebuilt binary.
+  - compilers
 
   # 05  patient clustering
   - r-cluster                             # silhouette
@@ -50,18 +76,9 @@ dependencies:
   - bioconductor-preprocesscore           # modulePreservation dependency
 
 # ── NOT here, on purpose ──────────────────────────────────────────────────
-# Two packages cannot be declared here and are installed from CRAN instead, by
-# ensure_pkg() in src/paths.R. Every notebook that needs one calls it before
-# library(), so each notebook still resolves its own dependencies and runs
-# standalone under the R kernel.
+# VarSelLCM has no conda package on any platform or subdir -- checked for both
+# osx-arm64 and osx-64. It is installed from CRAN by ensure_pkg() in
+# src/paths.R, which steps 04 and 12 call before library(). Guarded by
+# requireNamespace(), so a second run is a no-op and touches no network.
 #
-#   WGCNA      bioconda ships r-wgcna for linux-64 and osx-64 but NOT for
-#              osx-arm64. Declaring it makes the environment unsolvable on
-#              Apple Silicon -- "r-wgcna does not exist". Its own dependencies
-#              (dynamicTreeCut, fastcluster, impute, preprocessCore) ARE conda
-#              packages and stay declared above, so the CRAN install is quick
-#              and does not compile them again.
-#   VarSelLCM  has no conda package on any platform.
-#
-# Both are guarded by requireNamespace(), so a second run is a no-op and
-# touches no network.
+# It contains C++, which is why `compilers` is declared above.

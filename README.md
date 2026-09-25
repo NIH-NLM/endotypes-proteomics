@@ -73,27 +73,60 @@ rather than a relative path. Moving a directory is a one-line change there.
 
 ### Environment Setup
 
-Note you can use `conda` or you can use `mamba`
+Either `conda` or `mamba` works; `mamba` solves faster.
+
+**Linux, including the ADAPTS / Lifebit platform.** Every package is a native binary and nothing
+compiles:
 
 ```bash
-conda env create -f endotypes-proteomics.yml     # or micromamba / conda
-conda activate endotypes-proteomics
+mamba env create -f endotypes-proteomics.yml     # or conda / micromamba
+mamba activate endotypes-proteomics
 Rscript -e 'IRkernel::installspec()'             # R kernel
 python -m bash_kernel.install                    # Bash kernel
 jupyter lab
 ```
 
-**Two R packages are not in the environment file, deliberately.** `WGCNA` has no
-`osx-arm64` conda build — declaring it makes the environment unsolvable on Apple Silicon — and
-`VarSelLCM` has no conda package on any platform. Both are installed from CRAN by `ensure_pkg()`
-in `src/paths.R`, which every notebook that needs them calls before `library()`. Nothing extra to
-run: open any notebook under the R kernel and it resolves its own dependencies, installing only
-what is missing and touching no network on a second run.
+**Apple Silicon.** `WGCNA` reaches conda through bioconda, which builds it for `linux-64` and
+`osx-64` but **not** for `osx-arm64`. On an M-series Mac the solve fails outright:
 
-**One dependency is not in that file.** `VarSelLCM` has no conda package, so step 04 installs it
-from CRAN in its own first cell, guarded by `requireNamespace()` so a second run is a no-op. It is
-the only thing this project installs from inside a notebook, and the environment file says so where
-the dependency would otherwise have gone.
+```
+error  libmamba Could not solve for environment specs
+    └─ r-wgcna =* * does not exist (perhaps a typo or a missing channel).
+```
+
+Build the whole environment for `osx-64` and let Rosetta 2 run it. Every package then arrives
+prebuilt, exactly as on Linux:
+
+```bash
+CONDA_SUBDIR=osx-64 mamba env create -f endotypes-proteomics.yml
+mamba activate endotypes-proteomics
+conda config --env --set subdir osx-64           # keep later installs on osx-64
+Rscript -e 'IRkernel::installspec()'
+python -m bash_kernel.install
+jupyter lab
+```
+
+The third line matters. Without it a later `mamba install` into this environment reverts to
+`osx-arm64` and the solve breaks again. If Rosetta is not present:
+
+```bash
+softwareupdate --install-rosetta --agree-to-license
+```
+
+#### One package is not in the environment file
+
+`VarSelLCM` has no conda package on any platform or subdir. Steps 04 and 12 install it from CRAN
+through `ensure_pkg()` in `src/paths.R`, guarded by `requireNamespace()` so a second run is a
+no-op and touches no network.
+
+It contains C++, so it compiles — which is why the environment file declares `compilers`. Conda's
+R invokes a conda compiler **by name** (`arm64-apple-darwin20.0.0-clang`, or the `osx-64`
+equivalent) and reports `command not found` if it is absent. Without it **no** CRAN package with
+compiled code can install into the environment.
+
+The channel list also carries `nodefaults`. Without it conda solves against `repo.anaconda.com`
+alongside conda-forge and bioconda; one install here ran for 88 minutes without finishing because
+of that.
 
 ### Notebooks
 
