@@ -65,20 +65,7 @@ data/SLE_doi.10.5281_zenodo_20342569/
 
 ### Repository layout
 
-Two kinds of file, and the split is the point: what a run **produces** is disposable, what a run
-**depends on** is committed.
 
-```
-cohorts/     COMMITTED  the frozen splits, cohort_assignment.csv, clinical-traits.csv
-proteins/    COMMITTED  curated prior knowledge -- interferon-response-genes.json
-ipynb/       COMMITTED  the ten notebooks, and nothing else
-src/         COMMITTED  R that is not a notebook, including paths.R
-data/        ignored    the Zenodo download
-  run_artifacts/        every .rds, derived .csv and figure a run makes -- delete freely
-```
-
-`cohorts/` is committed because redrawing the split would move every number downstream of it;
-`data/run_artifacts/` is not, because `./run_all.sh` rebuilds all of it from `cohorts/`.
 
 **`src/paths.R` is the only place these locations are written down.** Every notebook opens with
 `source("../src/paths.R")` and then says `coh("R_cohort-A_meta.csv")` or `art("wgcna_A.rds")`
@@ -86,9 +73,11 @@ rather than a relative path. Moving a directory is a one-line change there.
 
 ### Environment Setup
 
+Note you can use `conda` or you can use `mamba`
+
 ```bash
-mamba env create -f endotypes-proteomics.yml     # or micromamba / conda
-mamba activate endotypes-proteomics
+conda env create -f endotypes-proteomics.yml     # or micromamba / conda
+conda activate endotypes-proteomics
 Rscript -e 'IRkernel::installspec()'             # R kernel
 python -m bash_kernel.install                    # Bash kernel
 jupyter lab
