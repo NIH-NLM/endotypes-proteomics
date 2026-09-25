@@ -137,3 +137,46 @@ locate_ifn_module <- function(mods, columns, min_hits = 3L) {
                  min_hits, names(tally)[1], tally[[1]]), call. = FALSE)
   structure(names(tally)[1], hits = tally)
 }
+
+# ── showing figures in the notebook ───────────────────────────────────────
+#
+# Figures are written to data/run_artifacts/ as PNG. Rendered notebooks are
+# committed, so each figure is also displayed as cell output. Displaying the
+# file that was just written, rather than drawing a second time, means the
+# notebook shows exactly what is on disk.
+#
+# IRdisplay only works inside a Jupyter kernel. Under Rscript this prints the
+# filenames and nothing else, so run_all.sh is unaffected.
+
+show_figures <- function(pattern) {
+  fs <- sort(list.files(ARTIFACTS, pattern = pattern, full.names = TRUE))
+  if (!length(fs)) { cat("no figure matches", pattern, "\n"); return(invisible(NULL)) }
+  in_kernel <- isTRUE(getOption("jupyter.in_kernel"))
+  for (f in fs) {
+    cat(basename(f), "\n")
+    if (in_kernel) IRdisplay::display_png(file = f)
+  }
+  if (!in_kernel) cat("(not in a Jupyter kernel, so the images are not inlined here)\n")
+  invisible(fs)
+}
+
+# ── provenance ────────────────────────────────────────────────────────────
+#
+# Rendered notebooks are committed, so each one records where it ran. The
+# package versions are the part that actually varies between a laptop and the
+# ADAPTS / Lifebit platform.
+
+run_provenance <- function() {
+  si <- Sys.info()
+  cat("run on   :", si[["nodename"]], "(", si[["sysname"]], si[["release"]], ")\n")
+  cat("date     :", format(Sys.time(), "%Y-%m-%d %H:%M %Z"), "\n")
+  cat("R        :", R.version.string, "|", R.version$platform, "\n")
+  env <- Sys.getenv("CONDA_PREFIX")
+  cat("R comes from:", if (nzchar(env)) env else "system R, no conda environment active", "\n")
+  cat("packages :\n")
+  for (p in c("WGCNA", "ComplexHeatmap", "sva", "VarSelLCM", "cluster", "fpc", "circlize")) {
+    v <- tryCatch(as.character(packageVersion(p)), error = function(e) "not installed")
+    cat(sprintf("   %-16s %s\n", p, v))
+  }
+  invisible(NULL)
+}
