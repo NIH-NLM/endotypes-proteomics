@@ -56,27 +56,27 @@ read_traits <- function() {
   t
 }
 
-# ── dependencies a conda environment cannot carry ─────────────────────────
+# ── the one dependency conda cannot carry ─────────────────────────────────
 #
-# Two packages this project needs are not installable from conda on every
-# platform:
+# VarSelLCM has no conda package on any platform or subdir, so it is installed
+# from CRAN on demand. Steps 04 and 12 call ensure_pkg() before library().
 #
-#   WGCNA      bioconda ships r-wgcna for linux-64 and osx-64 but NOT for
-#              osx-arm64, so an Apple Silicon environment cannot solve with it
-#              declared. It is on CRAN and installs there.
-#   VarSelLCM  has no conda package at all.
+# It contains C++, so it compiles. conda's R invokes a conda compiler by name
+# (e.g. arm64-apple-darwin20.0.0-clang) and fails with "command not found" if
+# it is absent -- which is why `compilers` is declared in the environment file.
 #
-# Every notebook that needs one calls ensure_pkg() before library(), so each
-# notebook resolves its own dependencies and runs standalone under the R
-# kernel in JupyterLab. Guarded by requireNamespace(), so a second run is a
-# no-op and touches no network.
+# Everything else, WGCNA included, is a declared conda package. On Apple
+# Silicon that requires creating the environment with CONDA_SUBDIR=osx-64,
+# because bioconda has no osx-arm64 build of r-wgcna.
 
 ensure_pkg <- function(pkg, repos = "https://cloud.r-project.org") {
   if (requireNamespace(pkg, quietly = TRUE)) return(invisible(TRUE))
-  message("installing ", pkg, " from CRAN (no conda package for this platform)")
-  install.packages(pkg, repos = repos, quiet = TRUE)
+  message("installing ", pkg, " from CRAN (no conda package on any platform)")
+  install.packages(pkg, repos = repos)
   if (!requireNamespace(pkg, quietly = TRUE))
-    stop(pkg, " is required and could not be installed", call. = FALSE)
+    stop(pkg, " is required and could not be installed.\n",
+         "  It compiles, so the environment needs `compilers` -- see ",
+         "endotypes-proteomics.yml", call. = FALSE)
   invisible(TRUE)
 }
 

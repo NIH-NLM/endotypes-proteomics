@@ -3,7 +3,6 @@
 .f    <- grep("^--file=", commandArgs(FALSE), value = TRUE)
 .here <- if (length(.f)) dirname(normalizePath(sub("^--file=", "", .f[1]))) else "src"
 source(file.path(.here, "paths.R"))
-ensure_pkg("WGCNA")
 
 suppressMessages({library(WGCNA); library(ComplexHeatmap); library(circlize)})
 options(stringsAsFactors=FALSE); set.seed(42)
