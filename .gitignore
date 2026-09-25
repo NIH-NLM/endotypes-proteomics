@@ -1,8 +1,5 @@
 # ── what is committed, and what is not ────────────────────────────────────
 #
-#   cohorts/    COMMITTED. The frozen splits, the cohort assignment, the
-#               clinical trait list. Redrawing them moves every downstream
-#               number, so they are not regenerated -- they persist.
 #   proteins/   COMMITTED. Curated prior knowledge: gene sets the analysis is
 #               interpreted against, not derived from.
 #   ipynb/      COMMITTED, and holds notebooks and nothing else.
@@ -14,6 +11,8 @@
 
 # study data and every regenerable artifact
 data/
+cohorts/
+.ipynb_checkpoints/
 
 # ipynb/ holds notebooks. Anything else that lands there is a stray -- the
 # cohort CSVs live in cohorts/ now, and run output in data/run_artifacts/.

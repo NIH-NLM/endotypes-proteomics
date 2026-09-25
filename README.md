@@ -79,15 +79,33 @@ Either `conda` or `mamba` works; `mamba` solves faster.
 compiles:
 
 ```bash
-mamba env create -f endotypes-proteomics.yml     # or conda / micromamba
+mamba env create -f endotypes-proteomics.yml
 mamba activate endotypes-proteomics
-Rscript -e 'IRkernel::installspec()'             # R kernel
-python -m bash_kernel.install                    # Bash kernel
+Rscript -e 'IRkernel::installspec()'
+python -m bash_kernel.install
 jupyter lab
 ```
 
-**Apple Silicon.** `WGCNA` reaches conda through bioconda, which builds it for `linux-64` and
-`osx-64` but **not** for `osx-arm64`. On an M-series Mac the solve fails outright:
+**Apple Silicon — install Rosetta 2 first.**
+
+```bash
+softwareupdate --install-rosetta --agree-to-license
+```
+
+Do this **before** creating the environment. Every package in it is an `osx-64` binary, and
+without Rosetta none of them can execute — conda's own post-link scripts fail during the install
+itself:
+
+```
+error libmamba response code: -1 error message: Bad CPU type in executable
+critical libmamba failed to execute pre/post link script for bioconductor-genomeinfodbdata
+```
+
+and afterwards `python`, `jupyter` and `Rscript` all report `bad CPU type in executable`.
+
+The reason the environment is `osx-64` at all: `WGCNA` reaches conda through bioconda, which
+builds it for `linux-64` and `osx-64` but **not** for `osx-arm64`. On an M-series Mac the solve
+fails outright:
 
 ```
 error  libmamba Could not solve for environment specs
@@ -100,18 +118,18 @@ prebuilt, exactly as on Linux:
 ```bash
 CONDA_SUBDIR=osx-64 mamba env create -f endotypes-proteomics.yml
 mamba activate endotypes-proteomics
-conda config --env --set subdir osx-64           # keep later installs on osx-64
+conda config --env --set subdir osx-64
 Rscript -e 'IRkernel::installspec()'
 python -m bash_kernel.install
 jupyter lab
 ```
 
-The third line matters. Without it a later `mamba install` into this environment reverts to
-`osx-arm64` and the solve breaks again. If Rosetta is not present:
+The `conda config` line matters. Without it a later `mamba install` into this environment reverts
+to `osx-arm64` and the solve breaks again.
 
-```bash
-softwareupdate --install-rosetta --agree-to-license
-```
+Note the commands above carry no trailing `# comments`. An interactive `zsh` passes `#` through as
+a literal argument rather than stripping it, so a pasted line with a comment fails with
+`conda: error: unrecognized arguments: # ...`.
 
 #### One package is not in the environment file
 
