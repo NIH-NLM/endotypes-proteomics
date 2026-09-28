@@ -65,7 +65,30 @@ data/SLE_doi.10.5281_zenodo_20342569/
 
 ### Repository layout
 
+```
+cohorts/                COMMITTED and persisting. The frozen splits, the cohort
+                        assignment, and clinical-traits.csv. A run does not
+                        regenerate these; deleting them loses the split.
+genes/                  COMMITTED. Curated gene lists, file for file identical to
+                        endotypes-transcriptomics/genes/.
+ipynb/                   COMMITTED, rendered. Notebooks and nothing else.
+src/paths.R             COMMITTED. Locations, path builders, the two file readers,
+                        the probe-to-protein counters, SEED. It decides nothing.
+run_all.sh              the machine path: every notebook, in order, in place.
+endotypes-proteomics.yml the environment.
 
+data/                   NOT committed. The Zenodo download, and
+data/run_artifacts/     NOT committed. Everything a run regenerates: .rds, derived
+                        .csv tables. Safe to delete.
+figures/                COMMITTED. A 300 dpi PNG of every figure, 24 of them. A run
+                        regenerates them and each is also inline in its notebook, so
+                        they are reproducible rather than precious; they are committed
+                        so a figure can go into a slide without re-running anything.
+```
+
+**Every analysis step is in a notebook.** `src/` holds one file, and that file locates things and
+reads two committed inputs. Nothing in it makes a decision about the data, so reading the notebooks
+tells you the whole analysis and each notebook is one function that can become a Nextflow process.
 
 **`src/paths.R` is the only place these locations are written down.** Every notebook opens with
 `source("../src/paths.R")` and then says `coh("R_cohort-A_meta.csv")` or `art("wgcna_A.rds")`
@@ -133,9 +156,10 @@ a literal argument rather than stripping it, so a pasted line with a comment fai
 
 #### One package is not in the environment file
 
-`VarSelLCM` has no conda package on any platform or subdir. Steps 04 and 12 install it from CRAN
-through `ensure_pkg()` in `src/paths.R`, guarded by `requireNamespace()` so a second run is a
-no-op and touches no network.
+`VarSelLCM` has no conda package on any platform or subdir. Step 04 installs it from CRAN with a
+plain `install.packages()` inline in the notebook, guarded by `requireNamespace()` so a second run is
+a no-op and touches no network. There is no helper for this in `src/paths.R`: installing a package is
+a step of the analysis and belongs where it happens.
 
 It contains C++, so it compiles — which is why the environment file declares `compilers`. Conda's
 R invokes a conda compiler **by name** (`arm64-apple-darwin20.0.0-clang`, or the `osx-64`
@@ -152,19 +176,21 @@ For ease of analysis and understanding, a notebook was created for each of the s
 Each notebook reads the artifact of the previous step and then writes out its own output.
 
 **The sequence runs from a clean clone.** After the download above, `./run_all.sh` executes steps
-00–07 and 10–16 in order with no manual intervention; `--optional` adds 08 and 09. Verified by
+every step in order with no manual intervention. Verified by
 deleting `data/run_artifacts/` entirely and re-running: every step completes, and **`cohorts/`
 regenerates bit-identically** — step 00 reads the committed `cohort_assignment.csv` and reseeds
 from it, so the split never moves.
 
 Only `data/` is required from outside the repository. Everything else is either committed
-(`cohorts/`, `proteins/`, `ipynb/`, `src/`) or regenerated into `data/run_artifacts/`.
+(`cohorts/`, `genes/`, `ipynb/`, `src/`) or regenerated into `data/run_artifacts/`.
 
 | notebook | does |
 |---|---|
 | `00_prepare_data` | Zenodo → filter → log2 → ComBat → annotate → de-duplicate → split |
 | `01_soft_threshold` | the soft-thresholding power |
+| `01b_interferon_panel` | the curated gene sets, matched to SomaScan reagents |
 | `02_modules` | WGCNA fit, unsupervised |
+| `02b_interferon` | names the interferon module, two cited methods plus a control |
 | `03_eigenproteins` | one number per patient per module |
 | `04_module_traits` | module ↔ clinical trait, BH-corrected; VarSelLCM on the trait list |
 | `05_endotypes` | cluster patients in module space |
@@ -205,17 +231,27 @@ the load-bearing one. Antibodies to the same antigen system carry the same infor
 anti-Sm correlates **+0.52** with anti-RNP-A and anti-Ro52 correlates **+0.73** with anti-Ro60 — so
 a hold-out has to remove a whole group at a time. Removing anti-Sm alone leaks through anti-RNP-A.
 
-**`proteins/interferon-response-genes.json`** — 37 curated interferon-stimulated genes, 19 of them
-on this SomaScan menu carrying 23 probes, each with gene symbol, UniProt, protein name and its
-SOMAmer SeqIds. It replaces `grep("14148")`, which used to appear in four notebooks: that lookup
-returned whichever module one probe fell into and called it interferon, and **could not fail**.
-`locate_ifn_module()` takes the module holding a plurality of the curated set and stops if no module
-holds at least three of them. On cohort A it recovers `ivory` with 10 of the set against 2 for the
-runner-up — a result, since the set was written from the literature rather than from this fit.
+**`genes/`** — the curated gene lists, file for file the same directory as in
+`endotypes-transcriptomics`, so one set of gene definitions serves both repositories. The one that
+carries the analysis is `ifn-response-genes-28.txt`, the 28-gene interferon response score of Kim H
+et al. *J Interferon Cytokine Res* 2018;38:171-185 and de Jesus AA et al. *J Clin Invest*
+2020;130:1669-1682. `nfkb-only-control-11-dejesus2020.txt` is its **control**: 11 NF-kB targets with
+no STAT1, STAT2 or TYK1 binding site, which should not be in an interferon module.
+
+Step 01b resolves the lists against this SomaScan menu and writes `ifn_panel.csv`: 11 of the 28 genes
+are measured, carrying 12 reagents, and 8 of the 11 controls, carrying 13. Step 02b then names the
+interferon module two independent ways — the module holding the most of the 28, which is the method
+used in `endotypes-transcriptomics`, and a Reactome over-representation test, which is the method the
+source paper used on these data — and reports whether they agree.
+
+This replaces `grep("14148")`, which used to appear in four notebooks: that lookup returned whichever
+module one probe fell into and called it interferon, and **could not fail**. It also replaces
+`proteins/interferon-response-genes.json`, a 37-gene list with no single primary citation behind it,
+which omitted 8 of the cited 28 including RTP4, a gene that is on the menu.
 
 Note `feature_metadata.txt` ships `GeneSymbol` **pre-disambiguated**, so multi-probe genes arrive as
-`ISG15_seq.14148.2`. Matching on a bare `"ISG15"` silently finds nothing; the JSON carries the
-column name for this reason.
+`ISG15_seq.14148.2`. Matching on a bare `"ISG15"` silently finds nothing; step 01b strips the
+`_seq.<id>` suffix to recover the symbol and keeps the column name as the measurement.
 
 ### Outcomes
 
@@ -313,8 +349,8 @@ it is.
 > Discovery needs the full panel and therefore one site. Confirmation federates exactly, on a panel
 > small enough to release, **provided the thing being confirmed was named in advance.**
 
-That is why `proteins/interferon-response-genes.json` is committed prior knowledge rather than a
-by-product of the fit: it is the object that makes the federated arm possible.
+That is why `genes/` is committed prior knowledge rather than a by-product of the fit: it is the
+object that makes the federated arm possible.
 
 ### The algebra behind it
 

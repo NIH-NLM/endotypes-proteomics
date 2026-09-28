@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # The machine path. The same notebooks are the human path in JupyterLab.
 #
-#   ./run_all.sh              steps 00-07 and 10-20, the pipeline
-#   ./run_all.sh --optional   also runs 08 and 09, the projections
+#   ./run_all.sh              every step, 00-20
 #
 # Notebooks execute in place, so the committed file carries its own output.
 #
@@ -12,13 +11,23 @@
 set -euo pipefail
 cd "$(dirname "$0")/ipynb"
 
-STEPS=(00_prepare_data 01_soft_threshold 02_modules 03_eigenproteins \
-       04_module_traits 05_endotypes 06_heatmap 07_federation 10_federated_modules \
+STEPS=(00_prepare_data 01_soft_threshold 01b_interferon_panel 02_modules \
+       02b_interferon 03_eigenproteins \
+       04_module_traits 05_endotypes 06_heatmap 07_federation \
+       08_project_healthy 09_project_timepoints 10_federated_modules \
        11_modules_per_cohort 12_panels_per_cohort 13_cluster_both_axes \
        14_heatmaps 15_kmeans_arm 16_project_and_federate \
        17_cohort_diagnostics 18_federate_per_module 19_federation_benefit \
        20_module_preservation)
-[[ "${1:-}" == "--optional" ]] && STEPS+=(08_project_healthy 09_project_timepoints)
+# --optional is accepted and ignored. Steps 08 and 09 used to sit behind it and
+# were therefore skipped by a plain run, which left their committed notebooks
+# with no output at all. They take 5 and 4 seconds; the flag was not worth it.
+[[ "${1:-}" == "--optional" ]] && true
+
+# 02b is the slow one, about 10 minutes: it runs one ReactomePA over-representation
+# test per module, 52 of them, and enrichPathway rebuilds its Reactome mapping on
+# every call. It is not cached, because a cached enrichment would outlive a change
+# to the fit or to reactome.db without saying so.
 
 for nb in "${STEPS[@]}"; do
   printf '%-24s ' "$nb"

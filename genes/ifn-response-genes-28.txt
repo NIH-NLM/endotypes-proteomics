@@ -1,0 +1,78 @@
+# Interferon response genes, 28-gene score (union of Kim 2018 and de Jesus 2020).
+# One HGNC gene symbol per line. Lines starting with # are notes.
+#
+# Sources
+# Kim H, de Jesus AA, Brooks SR, et al. Development of a validated interferon score using NanoString
+#   technology. J Interferon Cytokine Res 2018;38:171-185. Supplementary Table S1 (the 28 genes),
+#   Supplementary Table S3 and Supplementary Figure S3A (the 25-gene score).
+# de Jesus AA, Hou Y, Brooks S, et al. Distinct interferon signatures and cytokine patterns define
+#   additional systemic autoinflammatory diseases. J Clin Invest 2020;130:1669-1682. Supplemental
+#   Figure 3B (the 28 genes and their binding sites), Methods Step 2 and Supplemental Figure 5 (the 11
+#   NF-kB-only genes).
+#
+# Differences between the two papers
+#   The 28 genes are the same in both papers.
+#   Each paper defines a different 25-gene subset:
+#     Kim 2018: the 28 without EPSTI1, SIGLEC1 and SPATS2L, the three genes added from the literature.
+#     de Jesus 2020: the 28 without CXCL10, GBP1 and SOCS1, the genes with STAT1 and NF-kB binding sites.
+#   de Jesus 2020 marks two binding sites as uncertain: OAS3 NF-kB "Y?" and SIGLEC1 STAT1 "N?".
+#   de Jesus 2020 states that SIGLEC1 was selected empirically for the score in Kim 2018.
+#
+# Per gene: in Kim 25 | added from the literature in Kim 2018 | STAT1 site | NF-kB site (de Jesus 2020)
+#   CXCL10   yes | no  | Y  | Y
+#   DDX60    yes | no  | Y  | N
+#   EPSTI1   no  | yes | Y  | N
+#   GBP1     yes | no  | Y  | Y
+#   HERC5    yes | no  | Y  | N
+#   HERC6    yes | no  | Y  | N
+#   IFI27    yes | no  | Y  | N
+#   IFI44    yes | no  | Y  | N
+#   IFI44L   yes | no  | Y  | N
+#   IFI6     yes | no  | Y  | N
+#   IFIT1    yes | no  | Y  | N
+#   IFIT2    yes | no  | Y  | N
+#   IFIT3    yes | no  | Y  | N
+#   IFIT5    yes | no  | Y  | N
+#   ISG15    yes | no  | Y  | N
+#   LAMP3    yes | no  | Y  | N
+#   LY6E     yes | no  | Y  | N
+#   MX1      yes | no  | Y  | N
+#   OAS1     yes | no  | Y  | N
+#   OAS2     yes | no  | Y  | N
+#   OAS3     yes | no  | Y  | Y?
+#   OASL     yes | no  | Y  | N
+#   RSAD2    yes | no  | Y  | N
+#   RTP4     yes | no  | Y  | N
+#   SIGLEC1  no  | yes | N? | N
+#   SOCS1    yes | no  | Y  | Y
+#   SPATS2L  no  | yes | Y  | N
+#   USP18    yes | no  | Y  | N
+#
+CXCL10
+DDX60
+EPSTI1
+GBP1
+HERC5
+HERC6
+IFI27
+IFI44
+IFI44L
+IFI6
+IFIT1
+IFIT2
+IFIT3
+IFIT5
+ISG15
+LAMP3
+LY6E
+MX1
+OAS1
+OAS2
+OAS3
+OASL
+RSAD2
+RTP4
+SIGLEC1
+SOCS1
+SPATS2L
+USP18

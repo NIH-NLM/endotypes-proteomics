@@ -1,21 +1,26 @@
 # ── what is committed, and what is not ────────────────────────────────────
 #
-#   proteins/   COMMITTED. Curated prior knowledge: gene sets the analysis is
-#               interpreted against, not derived from.
-#   ipynb/      COMMITTED, and holds notebooks and nothing else.
-#   src/        COMMITTED. R that is not a notebook.
+#   cohorts/    COMMITTED and persisting. The frozen splits, the cohort
+#               assignment, and the clinical trait list. A run does not
+#               regenerate these; deleting them loses the split.
+#   genes/      COMMITTED. Curated gene sets, identical to the directory of the
+#               same name in endotypes-transcriptomics.
+#   ipynb/      COMMITTED, rendered, and holds notebooks and nothing else.
+#   src/        COMMITTED. paths.R: locations only.
+#   run_all.sh, README.md, endotypes-proteomics.yml   COMMITTED.
 #
 #   data/       NOT committed. The study download, and data/run_artifacts/,
-#               which holds everything a run can regenerate. Delete it and
-#               ./run_all.sh rebuilds it.
+#               which holds everything a run can regenerate.
+#   figures/    COMMITTED. A 300 dpi PNG of every figure. A run regenerates them,
+#               so they are reproducible rather than precious, but they are committed
+#               so a figure can be taken into a slide or a manuscript without
+#               re-running the pipeline.
 
-# study data and every regenerable artifact
 data/
-cohorts/
 .ipynb_checkpoints/
 
 # ipynb/ holds notebooks. Anything else that lands there is a stray -- the
-# cohort CSVs live in cohorts/ now, and run output in data/run_artifacts/.
+# cohort CSVs live in cohorts/ and run output in data/run_artifacts/.
 ipynb/artifacts/
 ipynb/*.csv
 ipynb/*.rds
