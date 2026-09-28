@@ -1,0 +1,46 @@
+# Interferon response genes, 25-gene score of Kim 2018.
+# The 28 genes without EPSTI1, SIGLEC1 and SPATS2L.
+# One HGNC gene symbol per line. Lines starting with # are notes.
+#
+# Sources
+# Kim H, de Jesus AA, Brooks SR, et al. Development of a validated interferon score using NanoString
+#   technology. J Interferon Cytokine Res 2018;38:171-185. Supplementary Table S1 (the 28 genes),
+#   Supplementary Table S3 and Supplementary Figure S3A (the 25-gene score).
+# de Jesus AA, Hou Y, Brooks S, et al. Distinct interferon signatures and cytokine patterns define
+#   additional systemic autoinflammatory diseases. J Clin Invest 2020;130:1669-1682. Supplemental
+#   Figure 3B (the 28 genes and their binding sites), Methods Step 2 and Supplemental Figure 5 (the 11
+#   NF-kB-only genes).
+#
+# Differences between the two papers
+#   The 28 genes are the same in both papers.
+#   Each paper defines a different 25-gene subset:
+#     Kim 2018: the 28 without EPSTI1, SIGLEC1 and SPATS2L, the three genes added from the literature.
+#     de Jesus 2020: the 28 without CXCL10, GBP1 and SOCS1, the genes with STAT1 and NF-kB binding sites.
+#   de Jesus 2020 marks two binding sites as uncertain: OAS3 NF-kB "Y?" and SIGLEC1 STAT1 "N?".
+#   de Jesus 2020 states that SIGLEC1 was selected empirically for the score in Kim 2018.
+#
+CXCL10
+DDX60
+GBP1
+HERC5
+HERC6
+IFI27
+IFI44
+IFI44L
+IFI6
+IFIT1
+IFIT2
+IFIT3
+IFIT5
+ISG15
+LAMP3
+LY6E
+MX1
+OAS1
+OAS2
+OAS3
+OASL
+RSAD2
+RTP4
+SOCS1
+USP18

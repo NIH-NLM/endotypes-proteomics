@@ -1,0 +1,8 @@
+# Six-gene type I interferon score, used in interferonopathy and SLE studies.
+# One HGNC gene symbol per line. Lines starting with # are notes.
+IFI27
+IFI44L
+IFIT1
+ISG15
+RSAD2
+SIGLEC1

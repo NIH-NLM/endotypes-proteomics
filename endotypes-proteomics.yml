@@ -61,24 +61,40 @@ dependencies:
   - compilers
 
   # 05  patient clustering
-  - r-cluster                             # silhouette
+  - r-cluster                             # DECLARED BUT UNUSED. Nothing in any
+                                          # notebook loads it; 05 names Hennig's
+                                          # fpc::clusterboot only as the reference
+                                          # for the bootstrap Jaccard it writes out
+                                          # by hand. Kept pending Anne's decision.
 
-  # 06, 08  figures
+  # 02b  over-representation test on the protein modules. This is the method
+  #      Leung et al. used on these data (JCI Insight 2026, Methods: "Over-
+  #      representation tests were used to identify enriched pathways in WGCNA
+  #      protein modules ... using the enrichPathway function from the
+  #      ReactomePA R package"), so it is the method used here.
+  #      bioconda carries all three for linux-64 and osx-64, the two subdirs
+  #      this environment targets, so Apple Silicon is unaffected.
+  - bioconductor-reactomepa               # enrichPathway, the hypergeometric test
+  - bioconductor-reactome.db              # the pathway content -- VERSIONED. Which
+                                          # proteins belong to R-HSA-909733 depends
+                                          # on this release, so step 02b prints it.
+  - bioconductor-org.hs.eg.db             # SOMAmer GeneSymbol -> Entrez ID
+
+  # 06, 08, 14  figures
   - bioconductor-complexheatmap
   - r-circlize
 
-  # 04  reading proteins/*.json, the curated gene sets
-  - r-jsonlite
-
   # support layer
-  - r-fpc                                 # clusterboot, bootstrap Jaccard
+  - r-fpc                                 # DECLARED BUT UNUSED, like r-cluster
+                                          # above. 05 cites fpc::clusterboot as the
+                                          # reference for its hand-written bootstrap
+                                          # Jaccard but does not load the package.
   - bioconductor-impute                   # modulePreservation dependency
   - bioconductor-preprocesscore           # modulePreservation dependency
 
 # ── NOT here, on purpose ──────────────────────────────────────────────────
 # VarSelLCM has no conda package on any platform or subdir -- checked for both
-# osx-arm64 and osx-64. It is installed from CRAN by ensure_pkg() in
-# src/paths.R, which steps 04 and 12 call before library(). Guarded by
+# osx-arm64 and osx-64. Step 04 installs it from CRAN inline, guarded by
 # requireNamespace(), so a second run is a no-op and touches no network.
 #
 # It contains C++, which is why `compilers` is declared above.

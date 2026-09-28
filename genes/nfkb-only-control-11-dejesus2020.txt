@@ -1,0 +1,24 @@
+# NF-kB-only control genes, 11 genes (de Jesus 2020).
+# NF-kB1 and NF-kB2 target genes with no STAT1, STAT2 or TYK1 binding site, expressed in blood.
+# These are not interferon response genes. They are the control for the interferon response genes.
+# NF-kB1 targets: AICDA, CCND2, EBI3, GZMB, IFNG, MSR1, SELP, TANK, TLR2. NF-kB2 targets: SELL, XIAP.
+# One HGNC gene symbol per line. Lines starting with # are notes.
+#
+# Source
+# de Jesus AA, Hou Y, Brooks S, et al. Distinct interferon signatures and cytokine patterns define
+#   additional systemic autoinflammatory diseases. J Clin Invest 2020;130:1669-1682. Supplemental
+#   Figure 3B (the 28 genes and their binding sites), Methods Step 2 and Supplemental Figure 5 (the 11
+#   NF-kB-only genes).
+#   Kim 2018 does not define a control gene set.
+#
+AICDA
+CCND2
+EBI3
+GZMB
+IFNG
+MSR1
+SELP
+TANK
+TLR2
+SELL
+XIAP
