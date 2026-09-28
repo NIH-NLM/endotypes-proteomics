@@ -11,10 +11,12 @@
 #
 #   data/       NOT committed. The study download, and data/run_artifacts/,
 #               which holds everything a run can regenerate.
-#   figures/    NOT committed. A PNG of every figure; a run regenerates them.
+#   figures/    COMMITTED. A 300 dpi PNG of every figure. A run regenerates them,
+#               so they are reproducible rather than precious, but they are committed
+#               so a figure can be taken into a slide or a manuscript without
+#               re-running the pipeline.
 
 data/
-figures/
 .ipynb_checkpoints/
 
 # ipynb/ holds notebooks. Anything else that lands there is a stray -- the

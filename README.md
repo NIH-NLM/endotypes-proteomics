@@ -80,8 +80,10 @@ endotypes-proteomics.yml the environment.
 data/                   NOT committed. The Zenodo download, and
 data/run_artifacts/     NOT committed. Everything a run regenerates: .rds, derived
                         .csv tables. Safe to delete.
-figures/                NOT committed. A 300 dpi PNG of every figure; a run
-                        regenerates them, and each is also inline in its notebook.
+figures/                COMMITTED. A 300 dpi PNG of every figure, 24 of them. A run
+                        regenerates them and each is also inline in its notebook, so
+                        they are reproducible rather than precious; they are committed
+                        so a figure can go into a slide without re-running anything.
 ```
 
 **Every analysis step is in a notebook.** `src/` holds one file, and that file locates things and
