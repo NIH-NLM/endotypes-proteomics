@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The machine path. The same notebooks are the human path in JupyterLab.
 #
-#   ./run_all.sh              every step, 00-20
+#   ./run_all.sh              every step, 00-21
 #
 # Notebooks execute in place, so the committed file carries its own output.
 #
@@ -18,7 +18,7 @@ STEPS=(00_prepare_data 01_soft_threshold 01b_interferon_panel 02_modules \
        11_modules_per_cohort 12_panels_per_cohort 13_cluster_both_axes \
        14_heatmaps 15_kmeans_arm 16_project_and_federate \
        17_cohort_diagnostics 18_federate_per_module 19_federation_benefit \
-       20_module_preservation)
+       20_module_preservation 21_all_patients)
 # --optional is accepted and ignored. Steps 08 and 09 used to sit behind it and
 # were therefore skipped by a plain run, which left their committed notebooks
 # with no output at all. They take 5 and 4 seconds; the flag was not worth it.
